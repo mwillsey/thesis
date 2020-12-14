@@ -3,11 +3,12 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: texlive/texlive:TL2020
     steps:
     - uses: actions/checkout@v2
       with:
