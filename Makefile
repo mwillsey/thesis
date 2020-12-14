@@ -4,6 +4,4 @@ thesis.pdf:
 
 .PHONY: deploy
 deploy: thesis.pdf index.html
-	rm -rf out/
-	mkdir out/
 	cp -r $^ out/
