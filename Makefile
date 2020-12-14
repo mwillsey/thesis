@@ -3,5 +3,5 @@ thesis.pdf:
 	latexmk -pdf thesis.tex
 
 .PHONY: deploy
-deploy: thesis.pdf index.html
+deploy: thesis.pdf
 	cp -r $^ out/
