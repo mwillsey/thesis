@@ -1,3 +1,3 @@
 # thesis
 
-built copy [here](www.mwillsey.com/thesis/thesis.pdf)
+built copy [here](https://www.mwillsey.com/thesis/thesis.pdf)
