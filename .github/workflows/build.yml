@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: texlive/texlive:TL2020
+    container: texlive/texlive:latest
     steps:
     - uses: actions/checkout@v2
       with:
