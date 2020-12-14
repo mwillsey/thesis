@@ -1,0 +1,18 @@
+# latex stuff
+
+*.aux
+*.log
+*.out
+*.dvi
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# mac trash
+.DS_Store
+
+_build/
+out/
+
+# built papers
+/thesis.pdf
