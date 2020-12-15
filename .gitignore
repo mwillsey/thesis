@@ -7,11 +7,14 @@
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+*.bbl
+*.blg
+*.toc
 
 # mac trash
 .DS_Store
 
-_build/
+# _build/
 out/
 
 # built papers

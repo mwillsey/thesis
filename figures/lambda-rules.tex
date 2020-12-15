@@ -1,0 +1,154 @@
+\begin{figure}
+\begin{subfigure}[t]{0.48\linewidth}
+  \begin{lstlisting}[language=Rust, basicstyle=\tiny\ttfamily, numbers=left, escapechar=|,
+   xleftmargin=13pt,
+   numbersep=7pt,
+]
+define_language! {
+  enum Lambda {
+    // enum variants have data or children (eclass Ids)
+    // [Id; N] is an array of N `Id`s
+
+    // base type operators
+    "+" = Add([Id; 2]), "=" = Eq([Id; 2]),
+    "if" = If([Id; 3]),
+
+    // functions and binding
+    "app" = App([Id; 2]), "lam" = Lambda([Id; 2]),
+    "let" = Let([Id; 3]), "fix" = Fix([Id; 2]),
+
+    // (var x) is a use of `x` as an expression
+    "var" = Use(Id),
+    // (subst a x b) substitutes a for (var x) in b
+    "subst" = Subst([Id; 3]),
+
+    // base types have no children, only data
+    Bool(bool), Num(i32), Symbol(String),
+  }
+}
+
+// example terms and what they simplify to
+// pulled directly from the |\egg|test suite
+
+test_fn! { lambda_under, rules(),
+  "(lam x (+ 4 (app (lam y (var y)) 4)))"
+  => "(lam x 8))",
+}
+
+test_fn! { lambda_compose_many, rules(),
+  "(let compose (lam f (lam g (lam x
+                (app (var f)
+                     (app (var g) (var x))))))
+   (let add1 (lam y (+ (var y) 1))
+   (app (app (var compose) (var add1))
+        (app (app (var compose) (var add1))
+             (app (app (var compose) (var add1))
+                  (app (app (var compose) (var add1))
+                       (var add1)))))))"
+  => "(lam ?x (+ (var ?x) 5))"
+}
+
+test_fn! { lambda_if_elim, rules(),
+  "(if (= (var a) (var b))
+       (+ (var a) (var a))
+       (+ (var a) (var b)))"
+  => "(+ (var a) (var b))"
+}\end{lstlisting}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\linewidth}
+  \begin{lstlisting}[language=Rust, basicstyle=\tiny\ttfamily, escapechar=|, numbers=left, firstnumber=51,
+  numbersep=7pt,
+]
+// Returns a list of rewrite rules
+fn rules() -> Vec<Rewrite<Lambda, LambdaAnalysis>> { vec![
+
+ // open term rules
+ rw!("if-true";  "(if  true ?then ?else)" => "?then"),
+ rw!("if-false"; "(if false ?then ?else)" => "?else"),
+ rw!("if-elim";  "(if (= (var ?x) ?e) ?then ?else)" => "?else"
+     if ConditionEqual::parse("(let ?x ?e ?then)",
+                              "(let ?x ?e ?else)")),
+ rw!("add-comm";  "(+ ?a ?b)"        => "(+ ?b ?a)"),
+ rw!("add-assoc"; "(+ (+ ?a ?b) ?c)" => "(+ ?a (+ ?b ?c))"),
+ rw!("eq-comm";   "(= ?a ?b)"        => "(= ?b ?a)"),
+
+ // substitution introduction
+ rw!("fix";     "(fix ?v ?e)" =>
+                "(let ?v (fix ?v ?e) ?e)"),
+ rw!("beta";    "(app (lam ?v ?body) ?e)" =>
+                "(let ?v ?e ?body)"),
+
+ // substitution propagation
+ rw!("let-app"; "(let ?v ?e (app ?a ?b))" =>
+                "(app (let ?v ?e ?a) (let ?v ?e ?b))"),
+ rw!("let-add"; "(let ?v ?e (+   ?a ?b))" =>
+                "(+   (let ?v ?e ?a) (let ?v ?e ?b))"),
+ rw!("let-eq";  "(let ?v ?e (=   ?a ?b))" =>
+                "(=   (let ?v ?e ?a) (let ?v ?e ?b))"),
+ rw!("let-if";  "(let ?v ?e (if ?cond ?then ?else))" =>
+                "(if (let ?v ?e ?cond)
+                     (let ?v ?e ?then)
+                     (let ?v ?e ?else))"),
+
+ // substitution elimination
+ rw!("let-const";    "(let ?v ?e ?c)" => "?c"
+     if is_const(var("?c"))),
+ rw!("let-var-same"; "(let ?v1 ?e (var ?v1))" => "?e"),
+ rw!("let-var-diff"; "(let ?v1 ?e (var ?v2))" => "(var ?v2)"
+     if is_not_same_var(var("?v1"), var("?v2"))),
+ rw!("let-lam-same"; "(let ?v1 ?e (lam ?v1 ?body))" =>
+                     "(lam ?v1 ?body)"),
+ rw!("let-lam-diff"; "(let ?v1 ?e (lam ?v2 ?body))" =>
+     ( CaptureAvoid {
+        fresh: var("?fresh"), v2: var("?v2"), e: var("?e"),
+        if_not_free: "(lam ?v2 (let ?v1 ?e ?body))"
+                     .parse().unwrap(),
+        if_free: "(lam ?fresh (let ?v1 ?e
+                              (let ?v2 (var ?fresh) ?body)))"
+                 .parse().unwrap(),
+     })
+     if is_not_same_var(var("?v1"), var("?v2"))),
+]}\end{lstlisting}
+\end{subfigure}
+\vspace{-0.5em}
+\caption[Language and rewrites for the lambda calculus in \egg]{
+\egg is generic over user-defined languages;
+  here we define a language and rewrite rules for a lambda calculus partial evaluator.
+The provided \texttt{define\_language!} macro (lines 1-22) allows the simple definition
+  of a language as a Rust \texttt{enum}, automatically deriving parsing and
+  pretty printing.
+A value of type \texttt{Lambda} is an \enode that holds either data that the
+  user can inspect or some number of \eclass children (\eclass \texttt{Id}s).
+
+Rewrite rules can also be defined succinctly (lines 51-100).
+Patterns are parsed as s-expressions:
+  strings from the \texttt{define\_language!} invocation (ex: \texttt{fix}, \texttt{=}, \texttt{+}) and
+  data from the variants (ex: \texttt{false}, \texttt{1}) parse as operators or terms;
+  names prefixed by ``\texttt{?}'' parse as pattern variables.
+
+Some of the rewrites made are conditional using the
+  ``\texttt{left => right if cond}''
+  syntax.
+The \texttt{if-elim} rewrite on line 57 uses \egg's provided
+  \texttt{ConditionEqual} as a condition, only applying the right-hand side
+  if the \egraph can prove the two argument patterns equivalent.
+The final rewrite, \texttt{let-lam-diff}, is dynamic to support capture avoidance;
+  the right-hand side is a Rust value that
+  implements the \texttt{Applier} trait instead of a pattern.
+\autoref{fig:lambda-analysis} contains the supporting code for these rewrites.
+
+We also show some of the tests (lines 27-50)
+  from \egg's \texttt{lambda} test suite.
+The tests proceed by inserting the term on the left-hand side, running
+  \egg's equality saturation, and then checking to make sure the right-hand
+  pattern can be found in the same \eclass as the initial term.
+}
+\label{fig:lambda-rules}
+\label{fig:lambda-lang}
+\label{fig:lambda-examples}
+\end{figure}
+
+%%% Local Variables:
+%%% TeX-master: "../thesis"
+%%% End:

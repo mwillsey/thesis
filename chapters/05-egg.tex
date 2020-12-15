@@ -1,0 +1,230 @@
+\chapter{\egg: Easy, Extensible, and Efficient \Egraphs}
+
+\label{sec:egg}
+\label{sec:impl}
+\label{sec:lambda}
+
+We implemented the techniques of rebuilding and \eclass analysis in \egg,
+  an easy-to-use, extensible, and efficient \egraph library.
+To the best of our knowledge,
+  \egg is the first general-purpose, reusable \egraph implementation.
+This has allowed focused effort on ease of use and optimization,
+  knowing that any benefits will
+  be seen across use cases as opposed to a single, ad hoc instance.
+
+This section details \egg's implementation and some of the various
+  optimizations and tools it provides to the user.
+We use an extended example of a partial evaluator for the lambda calculus\footnote{
+  \Egraphs do not have any ``built-in'' support for binding;
+  for example, equality modulo alpha renaming is not free.
+  The explicit substitution provided in this section is is illustrative but rather high in performance cost.
+  Better support for languages with binding is important future work.
+},
+  for which we provide the complete source code (which few changes for readability)
+  in \autoref{fig:lambda-lang} and \autoref{fig:lambda-analysis}.
+While contrived, this example is compact and familiar, and it highlights
+  (1) how \egg is used and (2) some of its novel features like
+  \eclass analyses and dynamic rewrites.
+It demonstrates how \egg can tackle binding,
+  a perennially tough problem for \egraphs,
+  with a simple explicit substitution approach
+  powered by \egg's extensibility.
+\autoref{sec:case-studies} goes further, providing real-world case studies of
+  published projects that have depended on \egg.
+
+\egg is implemented in \textasciitilde{}5000 lines of Rust,\footnote
+{
+  Rust \cite{rust} is a high-level systems programming language.
+  \egg has been integrated into applications written in other
+  programming languages using both C FFI and serialization approaches.
+}
+including code, tests, and documentation.
+\egg is open-source, well-documented, and distributed via Rust's package
+  management system.\footnote{
+  Source: \url{https://github.com/mwillsey/egg}.
+  Documentation: \url{https://docs.rs/egg}.
+  Package: \url{https://crates.io/crates/egg}.
+  \\
+  This paper uses version 0.6 of \egg.
+}
+All of \egg's components are generic over the
+  user-provided language, analysis, and cost functions.
+
+\section{Ease of Use}
+\label{sec:egg-easy}
+
+\input{figures/lambda-rules}
+
+\egg's ease of use comes primarily from its design as a library.
+By defining only a language and some rewrite rules,
+  a user can quickly
+  start developing a synthesis or optimization tool.
+Using \egg as a Rust library,
+  the user defines the language using the \texttt{define\_language!} macro
+  shown in \autoref{fig:lambda-lang}, lines 1-22.
+Childless variants in the language may contain data of user-defined types,
+  and \eclass analyses or dynamic rewrites may inspect this data.
+
+%Defining a language is the only necessary input for \egg.
+%From there, a user may create and manipulate \egraphs that hold expressions from
+%  that language.
+%If the user wants to perform rewrites and equality saturation, \egg provides
+%  facilities for this as well.
+
+The user provides rewrites as shown in
+  \autoref{fig:lambda-lang}, lines 51-100.
+Each rewrite has a name, a left-hand side, and a right-hand side.
+For purely syntactic rewrites, the right-hand is simply a pattern.
+More complex rewrites can incorporate conditions or even dynamic right-hand
+  sides, both explained in the \autoref{sec:egg-extensible} and \autoref{fig:lambda-applier}.
+
+Equality saturation workflows, regardless of the application domain,
+  typically have a similar structure:
+add expressions to an empty \egraph, run rewrites until saturation or
+  timeout, and extract the best equivalent expressions according to some cost
+  function.
+This ``outer loop'' of equality saturation involves a significant amount of
+  error-prone boilerplate:
+\begin{itemize}
+  \item Checking for saturation, timeouts, and \egraph size limits.
+  \item Orchestrating the read-phase, write-phase, rebuild system
+    (\autoref{fig:rebuild-code}) that makes \egg fast.
+  \item Recording performance data at each iteration.
+  \item Potentially coordinating rule execution so that expansive rules like
+    associativity do not dominate the \egraph.
+  \item Finally, extracting the best expression(s) according to a
+  user-defined cost function.
+\end{itemize}
+
+\egg provides these functionalities through its \texttt{Runner} and
+  \texttt{Extractor} interfaces.
+\texttt{Runner}s automatically detect saturation, and can be configured to stop
+  after a time, \egraph size, or iterations limit.
+The equality saturation loop provided by \egg calls \texttt{rebuild}, so users
+  need not even know about \egg's deferred invariant maintenance.
+\texttt{Runner}s record various metrics about each iteration automatically,
+  and the user can hook into this to report relevant data.
+\texttt{Extractor}s select the optimal term from an \egraph given a
+  user-defined, local cost function.\footnote{
+    As mentioned in \autoref{sec:tricks-extraction}, extraction can be
+    implemented as part of an \eclass analysis.
+    The separate \texttt{Extractor} feature is still useful for ergonomic and
+    performance reasons.
+  }
+The two can be combined as well; users commonly record the ``best so far''
+  expression by extracting in each iteration.
+
+\autoref{fig:lambda-lang} also shows \egg's \texttt{test\_fn!}
+  macro for easily creating tests (lines 27-50).
+These tests create an \egraph with the given expression, run equality saturation
+  using a \texttt{Runner}, and check to make sure the right-hand pattern can be
+  found in the same \eclass as the initial expression.
+
+\section{Extensibility}
+\label{sec:egg-extensible}
+
+For simple domains, defining a language and purely syntactic rewrites will
+  suffice.
+However, our partial evaluator requires interpreted reasoning, so we use some of
+  \egg's more advanced features like \eclass analyses and dynamic rewrites.
+Importantly, \egg supports these extensibility features as a library:
+  the user need not modify the \egraph or \egg's internals.
+
+\input{figures/lambda-code}
+
+\autoref{fig:lambda-applier} shows the remainder of the code for our lambda
+  calculus partial evaluator.
+It uses an \eclass analysis (\texttt{LambdaAnalysis})
+  to track free variables and constants associated
+  with each \eclass.
+The implementation of the \eclass analysis is in Lines 11-50.
+The \eclass analysis invariant
+  guarantees that the analysis data contains an over-approximation of free variables
+  from terms represented in that \eclass.
+The analysis also does constant folding
+  (see the \texttt{make} and \texttt{modify} methods).
+The \texttt{let-lam-diff} rewrite (Line 90, \autoref{fig:lambda-rules})
+  uses the \texttt{CaptureAvoid} (Lines 81-100, \autoref{fig:lambda-applier})
+  dynamic right-hand side to do capture-avoiding
+  substitution only when necessary based on the free variable information.
+The conditional rewrites from \autoref{fig:lambda-rules} depend on the
+  conditions \texttt{is\_not\_same\_var} and
+  \texttt{is\_var} (Lines 68-74, \autoref{fig:lambda-applier})
+  to ensure correct substitution.
+
+\egg is extensible in other ways as well.
+As mentioned above, \texttt{Extractor}s are parameterized by a user-provided
+  cost function.
+\texttt{Runner}s are also extensible with user-provided rule schedulers that can
+  control the behavior of potentially troublesome rewrites.
+\label{sec:rule-scheduling}
+In typical equality saturation, each rewrite is searched for and applied each
+  iteration.
+This can cause certain rewrites, commonly associativity or distributivity,
+  to dominate others and make the search space less productive.
+Applied in moderation, these rewrites can trigger other rewrites and find
+  greatly improved expressions,
+  but they can also slow the search by
+  exploding the \egraph exponentially in size.
+By default, \egg uses the built-in backoff scheduler
+  that identifies rewrites that are matching in exponentially-growing
+  locations and temporarily bans them.
+We have observed that this greatly reduced run time (producing the same results)
+  in many settings.
+\egg can also use a conventional every-rule-every-time scheduler, or the user
+  can supply their own.
+
+\section{Efficiency}
+\label{sec:egg-efficient}
+
+\egg's novel \textit{rebuilding} algorithm (\autoref{sec:rebuild})
+combined with systems programming best practices
+  makes \egraphs---and the equality saturation
+  use case in particular---more efficient than prior tools.
+
+\egg is implemented in Rust, giving the compiler freedom to
+  specialize and inline user-written code.
+This is especially important as
+  \egg's generic nature leads to tight interaction
+  between library code
+  (e.g., searching for rewrites) and user code (e.g., comparing operators).
+\egg is designed from the ground up to use cache-friendly,
+  flat buffers with minimal indirection for most internal data structures.
+This is in sharp contrast to traditional representations of \egraphs
+  \cite{nelson, simplify} that contains many tree- and linked list-like data
+  structures.
+\egg additionally compiles patterns to be executed by a small virtual machine
+  \cite{ematching}, as opposed to recursively walking the tree-like
+  representation of patterns.
+
+Aside from deferred rebuilding, \egg's equality saturation algorithm leads to
+  implementation-level performance enhancements.
+Searching for rewrite matches, which is the bulk of running time, can be
+  parallelized thanks to the phase separation.
+Either the rules or \eclasses could be searched in parallel.
+Furthermore, the once-per-iteration frequency of rebuilding allows \egg to
+  establish other performance-enhancing invariants that hold during the
+  read-only search phase.
+For example, \egg sorts \enodes within each \eclass to enable binary search, and
+  also maintains a cache mapping function symbols to \eclasses that
+  contain \enodes with that function symbol.
+
+Many of \egg's extensibility features can also be used to improve performance.
+As mentioned above, rule scheduling can lead to great performance improvement in
+  the face of ``expansive'' rules that would otherwise dominate the search
+  space.
+The \texttt{Runner} interface also supports user hooks that can stop
+  the equality saturation after some arbitrary condition.
+This can be useful when using equality saturation to prove terms equal; once
+  they are unified, there is no point in continuing.
+\label{sec:egg-batched}
+\egg's \texttt{Runner}s also support batch simplification, where multiple terms
+  can be added to the initial \egraph before running equality saturation.
+If the terms are substantially similar, both rewriting and any \eclass analyses
+  will benefit from the \egraph's inherent structural deduplication.
+The case study in \autoref{sec:herbie} uses batch simplification to achieve
+  a large speedup with simplifying similar expressions.
+
+%%% Local Variables:
+%%% TeX-master: "../thesis"
+%%% End:

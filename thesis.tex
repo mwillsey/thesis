@@ -1,5 +1,200 @@
-\documentclass{article}
+\documentclass[12pt, oneside]{report}
+
+\usepackage{fullpage}
+\usepackage{xargs}
+\usepackage{xspace}
+\usepackage[doublespacing]{setspace}
+
+\usepackage{microtype}
+\usepackage[T1]{fontenc}
+
+\usepackage{subcaption}
+
+\usepackage{xcolor}
+\usepackage{graphicx}
+\graphicspath{{_build/}{figures/}}
+
+\usepackage{hyperref}
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+\def\subsubsectionautorefname{Section}
+
+\usepackage{amsmath}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{proof}{Proof}[chapter]
+
+\usepackage{palatino}
+\usepackage[scaled=.9]{DejaVuSansMono}
+
+\usepackage{listings}
+\lstset{
+  columns=flexible,
+  keepspaces=true,
+  showstringspaces=false,
+  stringstyle=\slshape\color{green!40!black},
+  basicstyle=\ttfamily\small,
+  language=Python,
+  morekeywords={*, self},
+  commentstyle=\slshape\color{black!60},
+  tabsize=2,
+}
+
+\lstdefinelanguage{Rust}{
+  sensitive,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  moredelim=[s][{\itshape\color[rgb]{0,0,0.75}}]{\#[}{]},
+  morestring=[b]{"},
+  alsodigit={},
+  alsoother={},
+  alsoletter={!},
+  % keywords
+  otherkeywords={=>},
+  morekeywords={break, continue, else, for, if, in, loop, match, return, while},
+  morekeywords={as, const, let, move, mut, ref, static, unsafe},
+  morekeywords={dyn, enum, fn, impl, Self, self, struct, trait, type, use, where},
+  morekeywords={crate, extern, mod, pub, super},
+  morekeywords={abstract, alignof, become, box, do, final, macro,
+    offsetof, override, priv, proc, pure, sizeof, typeof, unsized, virtual, yield},
+  % traits
+  morekeywords=[2]{Send},
+  % types
+  morekeywords=[3]{bool, char, f32, f64, i8, i16, i32, i64, isize, str, u8, u16, u32, u64, unit, usize, i128, u128},
+}%
+
+\def\mytitle{Practical, Flexible Equality Saturation}
+\def\myauthor{Max Willsey}
+\def\year{2021}
+
+\title{\mytitle}
+\author{\myauthor}
+
+\input{macros}
 
 \begin{document}
-Hello
+\pagestyle{empty}
+
+% title and copyright pages
+\begin{center}
+  {\Large \mytitle}
+  \vfill
+
+  \myauthor
+  \vfill
+
+  \begin{spacing}{1}
+    A dissertation \\
+    submitted in partial fulfillment of the \\
+    requirements for the degree of
+  \end{spacing}
+  \vfill
+
+  Doctor of Philosophy
+  \vfill
+
+  University of Washington \\
+  \year
+  \vfill
+
+  Reading Commitee: \\
+  Luis Ceze, Chair \\
+  Adriana Schulz \\
+  Zachary Tatlock
+  \vfill
+
+  \begin{spacing}{1}
+    Program Authorized to Offer Degree: \\
+    Computer Science \& Engineering
+  \end{spacing}
+  \clearpage
+
+  \textcopyright{} Copyright \year\\
+  \myauthor
+  \clearpage
+\end{center}
+
+\pagestyle{plain}
+
+\setcounter{page}{1}
+\pagenumbering{roman}
+
+% abstract page
+\begin{center}
+  University of Washington \\[1em]
+  \textbf{Abstract}        \\[1em]
+  \mytitle                 \\[1em]
+  \myauthor                \\[1em]
+
+  Chair of the Supervisory Committee: \\[-0.5em]
+  Professor Luis Ceze                 \\[-0.5em]
+  Computer Science \& Engineering
+  \\[2em]
+\end{center}
+\input{abstract}
+\clearpage
+
+\begin{spacing}{1.5}
+  \tableofcontents
+\end{spacing}
+
+\chapter*{Acknowledgements}
+Thanks to some people.
+
+%%%%%%%%%%%%%%%%%%%%
+%%% main content %%%
+%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+% speculative
+% - Carpentry Compiler 2.0
+% - Speculative (new material)
+% - Datalog
+% - Extraction
+% - NSGA II
+% - Greedy
+% - RecExpr
+% - ILP
+% - EqSatBench
+% - Rewriting Competition
+
+
+\input{chapters/01-intro}
+\input{chapters/02-background}
+\input{chapters/03-rebuilding}
+\input{chapters/04-analyses}
+\input{chapters/05-egg}
+% \chapter{Introduction}
+% \section{Rewriting}
+% \cite{nelson-oppen-78}
+
+% \section{E-Graphs and Eqsat}
+% \section{Making it practical}
+% \section{Results}
+
+% \chapter{Background}
+% \section{Rewriting and Notation}
+% \section{Phase Ordering}
+% \section{E-Graph}
+% \section{EqSat}
+
+% \chapter{Deferred Invariant Maintenance}
+% \chapter{Analyses}
+% \chapter{\egg: a library}
+
+\chapter{Case Study: CAD Simplification}
+\chapter{Case Study: Rewrite Synthesis}
+\chapter{Case Study: Deep Learning Compute Graph Optimization}
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% ending content %%%
+%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{alpha}
+\bibliography{references}
+
 \end{document}
