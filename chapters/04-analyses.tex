@@ -265,8 +265,7 @@ We can formulate constant folding as an \eclass analysis that highlights the
   parallels with abstract interpretation.
 Let the domain $D = \texttt{Option<Constant>}$, and let the \texttt{join}
   operation be the ``\texttt{or}'' operation of the \texttt{Option} type:
-\\
-\begin{minipage}{\linewidth}
+\begin{figure}[h!]
 \begin{lstlisting}[language=Rust, basicstyle=\ttfamily\footnotesize, xleftmargin=35mm]
 match (a, b) {
   (None,    None   ) => None,
@@ -275,8 +274,7 @@ match (a, b) {
   (Some(x), Some(y)) => { assert!(x == y); Some(x) }
 }
 \end{lstlisting}
-\end{minipage}
-\\
+\end{figure}
 Note how \textsf{join} can also aid in debugging by checking properties about
   values that are unified in the \egraph;
   in this case we assert that all terms represented in an \eclass should have

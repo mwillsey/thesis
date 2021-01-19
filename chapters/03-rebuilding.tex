@@ -487,11 +487,11 @@ This provides a one-to-one comparison of deferred rebuilding against the
 
 \begin{figure}
   \begin{subfigure}{0.49\linewidth}
-    \includegraphics[height=5cm]{speedup}
+    \includegraphics[width=\linewidth]{speedup}
   \end{subfigure}
   \hfill
   \begin{subfigure}{0.49\linewidth}
-    \includegraphics[height=5cm]{speedup-log}
+    \includegraphics[width=\linewidth]{speedup-log}
   \end{subfigure}
   \caption{
     Rebuilding once per iteration---as opposed to after every merge---significantly
@@ -509,7 +509,7 @@ This provides a one-to-one comparison of deferred rebuilding against the
   \label{fig:eval}
 
   \begin{minipage}[t]{0.48\linewidth}
-  \includegraphics[height=5cm]{speedup-iter}
+  \includegraphics[width=\linewidth]{speedup-iter}
   \caption{
     As more rewrites are applied, deferring rebuilding gives greater speedup.
     Each line represents a single test: each equality saturation iteration plots
@@ -523,7 +523,7 @@ This provides a one-to-one comparison of deferred rebuilding against the
   \end{minipage}
   \hfill
   \begin{minipage}[t]{0.48\linewidth}
-  \includegraphics[height=5cm]{repairs}
+  \includegraphics[width=\linewidth]{repairs}
   \caption{
     The time spent in congruence maintenance correlates with the number of calls
     to the \texttt{repair} method.

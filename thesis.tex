@@ -1,5 +1,18 @@
 \documentclass[12pt, oneside]{report}
 
+\usepackage{hyperref}
+\def\chapterautorefname{Chapter}
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+\def\subsubsectionautorefname{Section}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\algnewcommand\Not{\textbf{not} }
+\newcommand{\algorithmautorefname}{Algorithm} % autoref
+
 \usepackage{fullpage}
 \usepackage{xargs}
 \usepackage{xspace}
@@ -8,28 +21,26 @@
 \usepackage{microtype}
 \usepackage[T1]{fontenc}
 
+\usepackage[font={sf}]{caption}
 \usepackage{subcaption}
+
+\usepackage{multirow}
 
 \usepackage{xcolor}
 \usepackage{graphicx}
 \graphicspath{{_build/}{figures/}}
-
-\usepackage{hyperref}
-\def\sectionautorefname{Section}
-\def\subsectionautorefname{Section}
-\def\subsubsectionautorefname{Section}
 
 \usepackage{amsmath}
 \newtheorem{definition}{Definition}[chapter]
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{proof}{Proof}[chapter]
 
-\usepackage{palatino}
+\usepackage{libertine}
 \usepackage[scaled=.9]{DejaVuSansMono}
 
 \usepackage{listings}
 \lstset{
-  columns=flexible,
+  columns=fullflexible,
   keepspaces=true,
   showstringspaces=false,
   stringstyle=\slshape\color{green!40!black},
@@ -77,10 +88,10 @@
 
 % title and copyright pages
 \begin{center}
-  {\Large \mytitle}
+  {\huge \mytitle}
   \vfill
 
-  \myauthor
+  {\Large \myauthor}
   \vfill
 
   \begin{spacing}{1}
@@ -166,6 +177,13 @@ Thanks to some people.
 \input{chapters/03-rebuilding}
 \input{chapters/04-analyses}
 \input{chapters/05-egg}
+\input{chapters/06-case-studies}
+ \section{CAD Simplification}
+ \section{Rewrite Synthesis}
+ \input{chapters/case-herbie}
+ \input{chapters/case-tensat}
+
+
 % \chapter{Introduction}
 % \section{Rewriting}
 % \cite{nelson-oppen-78}
@@ -184,9 +202,6 @@ Thanks to some people.
 % \chapter{Analyses}
 % \chapter{\egg: a library}
 
-\chapter{Case Study: CAD Simplification}
-\chapter{Case Study: Rewrite Synthesis}
-\chapter{Case Study: Deep Learning Compute Graph Optimization}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% ending content %%%

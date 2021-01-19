@@ -130,7 +130,7 @@ More precisely:
   An \egraph defines three equivalence relations.
   \begin{itemize}
     \item Over \eclass ids: $a \equivid b$ iff $\find(a) = \find(b)$.
-    \item Over \enodes: $n_{1} \equivnode n_{2}$ iff \enodes $n_{1}, n_{2}$ are in the same \eclass, 
+    \item Over \enodes: $n_{1} \equivnode n_{2}$ iff \enodes $n_{1}, n_{2}$ are in the same \eclass,
           i.e., $\exists a.\ n_{1}, n_{2} \in M[a]$.
     \item Over terms: $t_{1} \equivterm t_{2}$ iff terms $t_{1}, t_{2}$ are represented in the same \eclass.
   \end{itemize}
@@ -226,7 +226,7 @@ These are collectively referred to as the \textit{e-graph invariants}.
   \begin{subfigure}[t]{0.175\linewidth}
     \centering
     \includegraphics[height=30mm]{overview1.pdf}
-    \caption{Initial \egraph contains ${(a \times 2) / 2}$.}
+    \caption{\Egraph contains ${(a \times 2) / 2}$.}
     \label{fig:egraph-rewrite1}
   \end{subfigure}
   \hfill
@@ -234,7 +234,7 @@ These are collectively referred to as the \textit{e-graph invariants}.
     \centering
     \includegraphics[height=30mm]{overview2.pdf}
     \caption{
-      After applying rewrite ${x \times 2 \to x \ll 1}$.
+      Applied ${x \times 2 \to x \ll 1}$.
     }
     \label{fig:egraph-rewrite2}
   \end{subfigure}
@@ -243,7 +243,7 @@ These are collectively referred to as the \textit{e-graph invariants}.
     \centering
     \includegraphics[height=30mm]{overview3.pdf}
     \caption{
-      After applying rewrite ${(x \times y) / z \to x \times (y / z)}$.
+      Applied rewrite ${(x \times y) / z \to x \times (y / z)}$.
     }
     \label{fig:egraph-rewrite3}
   \end{subfigure}
@@ -252,7 +252,7 @@ These are collectively referred to as the \textit{e-graph invariants}.
     \centering
     \includegraphics[height=30mm]{overview4.pdf}
     \caption{
-      After applying rewrites ${x / x \to 1}$ and ${1 \times x \to x}$.
+      Applied ${x / x \to 1}$ and ${1 \times x \to x}$.
     }
     \label{fig:egraph-rewrite4}
   \end{subfigure}
