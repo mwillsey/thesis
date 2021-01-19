@@ -4,7 +4,7 @@ UNAME=$(shell uname)
 ifeq ($(UNAME),Darwin)
 DRAWIO ?= /Applications/draw.io.app/Contents/MacOS/draw.io
 endif
-DRAWIO ?= drawio
+DRAWIO ?= env DISPLAY=:0 drawio
 
 DRAWINGS=$(wildcard figures/*.drawio)
 DRAW_PDFS=$(patsubst figures/%.drawio, _build/%.pdf, $(DRAWINGS))

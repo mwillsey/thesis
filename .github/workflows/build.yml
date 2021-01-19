@@ -7,15 +7,20 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container: texlive/texlive:latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
       with:
         persist-credentials: false
 
+    - name: Install latex
+      run: |
+        sudo apt-get install -y latexmk texlive texlive-latex-extra texlive-science texlive-fonts-extra
+
     - name: Build
-      run: make deploy
+      run: |
+        latexmk -f -pdf -file-line-error -interaction=nonstopmode thesis.tex || true
+        cp -r thesis.pdf out/
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@3.7.1
