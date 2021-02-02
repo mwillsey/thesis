@@ -94,15 +94,6 @@
  keywords = {optimizing compiler, superoptimizer},
 }
 
-@phdthesis{nelson,
- author = {Nelson, Charles Gregory},
- title = {Techniques for Program Verification},
- year = {1980},
- note = {AAI8011683},
- publisher = {Stanford University},
- address = {Stanford, CA, USA},
-}
-
 @inproceedings{pp-congr,
 author = {Nieuwenhuis, Robert and Oliveras, Albert},
 title = {Proof-Producing Congruence Closure},
@@ -155,23 +146,7 @@ pages = {201–215},
 numpages = {15}
 }
 
-@InProceedings{eqsat-llvm,
-author="Stepp, Michael
-and Tate, Ross
-and Lerner, Sorin",
-editor="Gopalakrishnan, Ganesh
-and Qadeer, Shaz",
-title="Equality-Based Translation Validator for LLVM",
-booktitle="Computer Aided Verification",
-year="2011",
-publisher="Springer Berlin Heidelberg",
-address="Berlin, Heidelberg",
-pages="737--742",
-abstract="We updated our Peggy tool, previously presented in [6], to perform translation validation for the LLVM compiler using a technique called Equality Saturation. We present the tool, and illustrate its effectiveness at doing translation validation on SPEC 2006 benchmarks.",
-isbn="978-3-642-22110-1"
-}
-
-@Inbook{nachum-rewrites,
+@incollection{nachum-rewrites,
 author="Dershowitz, Nachum",
 editor="Lauer, Peter E.",
 title="A taste of rewrite systems",
@@ -260,7 +235,7 @@ numpages = {11},
 keywords = {Floating point, program rewriting, numerical accuracy}
 }
 
-@online{rust,
+@misc{rust,
   title = {Rust programming language},
   author = {Rust},
   howpublished = {\url{https://www.rust-lang.org/}},
@@ -510,14 +485,6 @@ location = {London, UK},
 series = {PLDI 2020}
 }
 
-@inproceedings{taso,
-  title={TASO: optimizing deep learning computation with automatic generation of graph substitutions},
-  author={Jia, Zhihao and Padon, Oded and Thomas, James and Warszawski, Todd and Zaharia, Matei and Aiken, Alex},
-  booktitle={Proceedings of the 27th ACM Symposium on Operating Systems Principles},
-  pages={47--62},
-  year={2019}
-}
-
 @article{downey-cse,
   author = {Downey, Peter J. and Sethi, Ravi and Tarjan, Robert Endre},
   title = {Variations on the Common Subexpression Problem},
@@ -662,7 +629,7 @@ numpages = {13}
   url = {http://www.optimization-online.org/DB_HTML/2020/03/7705.html}
 }
 
-@software{ortools,
+@misc{ortools,
   title = {OR-Tools},
   version = {7.2},
   author = {Laurent Perron and Vincent Furnon},
@@ -678,7 +645,7 @@ booktitle = {12th {USENIX} Symposium on Operating Systems Design and Implementat
 year = {2016},
 }
 
-@software{TensorRT,
+@misc{TensorRT,
   title = {{TensorRT}},
   author = {NVIDIA},
   url = {https://developer.nvidia.com/tensorrt},
@@ -705,11 +672,12 @@ month = oct,
   year={2019}
 }
 
-@inproceedings{nasrnn,
+@article{nasrnn,
 title = {Neural Architecture Search with Reinforcement Learning},
 author  = {Barret Zoph and Quoc V. Le},
 year  = {2017},
-URL = {https://arxiv.org/abs/1611.01578}
+URL = {https://arxiv.org/abs/1611.01578},
+journal = {arXiv},
 }
 
 @INPROCEEDINGS{nasneta,
@@ -770,60 +738,8 @@ URL = {https://arxiv.org/abs/1611.01578}
  title = {Techniques for Program Verification},
  year = {1980},
  note = {AAI8011683},
- publisher = {Stanford University},
+ school = {Stanford University},
  address = {Stanford, CA, USA},
-}
-
-@inproceedings{pp-congr,
-author = {Nieuwenhuis, Robert and Oliveras, Albert},
-title = {Proof-Producing Congruence Closure},
-year = {2005},
-isbn = {3540255966},
-publisher = {Springer-Verlag},
-address = {Berlin, Heidelberg},
-url = {https://doi.org/10.1007/978-3-540-32033-3_33},
-doi = {10.1007/978-3-540-32033-3_33},
-booktitle = {Proceedings of the 16th International Conference on Term Rewriting and Applications},
-pages = {453–468},
-numpages = {16},
-location = {Nara, Japan},
-series = {RTA’05}
-}
-
-@inproceedings{eqsat,
- author = {Tate, Ross and Stepp, Michael and Tatlock, Zachary and Lerner, Sorin},
- title = {Equality Saturation: A New Approach to Optimization},
- booktitle = {Proceedings of the 36th Annual ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
- series = {POPL '09},
- year = {2009},
- isbn = {978-1-60558-379-2},
- location = {Savannah, GA, USA},
- pages = {264--276},
- numpages = {13},
- url = {http://doi.acm.org/10.1145/1480881.1480915},
- doi = {10.1145/1480881.1480915},
- acmid = {1480915},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {compiler optimization, equality reasoning, intermediate representation},
-}
-
-@article{dpll,
-author = {Davis, Martin and Putnam, Hilary},
-title = {A Computing Procedure for Quantification Theory},
-year = {1960},
-issue_date = {July 1960},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-volume = {7},
-number = {3},
-issn = {0004-5411},
-url = {https://doi.org/10.1145/321033.321034},
-doi = {10.1145/321033.321034},
-journal = {J. ACM},
-month = jul,
-pages = {201–215},
-numpages = {15}
 }
 
 @InProceedings{eqsat-llvm,
@@ -842,96 +758,6 @@ abstract="We updated our Peggy tool, previously presented in [6], to perform tra
 isbn="978-3-642-22110-1"
 }
 
-@Inbook{nachum-rewrites,
-author="Dershowitz, Nachum",
-editor="Lauer, Peter E.",
-title="A taste of rewrite systems",
-bookTitle="Functional Programming, Concurrency, Simulation and Automated Reasoning: International Lecture Series 1991--1992 McMaster University, Hamilton, Ontario, Canada",
-year="1993",
-publisher="Springer Berlin Heidelberg",
-address="Berlin, Heidelberg",
-pages="199--228",
-abstract="This survey of the theory and applications of rewriting with equations discusses the existence and uniqueness of normal forms, the KnuthBendix completion procedure and its variations, as well as rewriting-based (functional and logic) programming and (equational, first-order, and inductive) theorem proving. Ordinary, associative-commutative, and conditional rewriting are covered. Current areas of research are summarized and an extensive bibliography is provided.",
-isbn="978-3-540-47776-1",
-doi="10.1007/3-540-56883-2_11",
-url="https://doi.org/10.1007/3-540-56883-2_11"
-}
-
-@article{simplify,
- author = {Detlefs, David and Nelson, Greg and Saxe, James B.},
- title = {Simplify: A Theorem Prover for Program Checking},
- journal = {J. ACM},
- issue_date = {May 2005},
- volume = {52},
- number = {3},
- month = may,
- year = {2005},
- issn = {0004-5411},
- pages = {365--473},
- numpages = {109},
- url = {http://doi.acm.org/10.1145/1066100.1066102},
- doi = {10.1145/1066100.1066102},
- acmid = {1066102},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {Theorem proving, decision procedures, program checking},
-}
-
-@inproceedings{z3,
- author = {De Moura, Leonardo and Bj{\o}rner, Nikolaj},
- title = {Z3: An Efficient SMT Solver},
- booktitle = {Proceedings of the Theory and Practice of Software, 14th International Conference on Tools and Algorithms for the Construction and Analysis of Systems},
- series = {TACAS'08/ETAPS'08},
- year = {2008},
- isbn = {3-540-78799-2, 978-3-540-78799-0},
- location = {Budapest, Hungary},
- pages = {337--340},
- numpages = {4},
- url = {http://dl.acm.org/citation.cfm?id=1792734.1792766},
- acmid = {1792766},
- publisher = {Springer-Verlag},
- address = {Berlin, Heidelberg},
-}
-
-@article{spores,
-  title={{SPORES}: Sum-Product Optimization via Relational Equality Saturation for Large Scale Linear Algebra},
-  author={Wang, Yisu Remy and Hutchison, Shana and Leang, Jonathan and Howe, Bill and Suciu, Dan},
-  journal={Proceedings of the VLDB Endowment},
-  year={2020},
-  publisher={VLDB Endowment}
-}
-
-@article{herbie,
-    author = {Panchekha, Pavel and Sanchez-Stern, Alex and Wilcox, James R. and Tatlock, Zachary},
-    title = {Automatically Improving Accuracy for Floating Point Expressions},
-    year = {2015},
-    issue_date = {August 2015},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
-    volume = {50},
-    number = {6},
-    issn = {0362-1340},
-    url = {https://doi.org/10.1145/2813885.2737959},
-    doi = {10.1145/2813885.2737959},
-    journal = {SIGPLAN Not.},
-    month = jun,
-    pages = {1–11},
-    numpages = {11},
-    keywords = {Floating point, program rewriting, numerical accuracy}
-}
-
-@InProceedings{ematching,
-  author="de Moura, Leonardo and Bj{\o}rner, Nikolaj",
-  editor="Pfenning, Frank",
-  title="Efficient E-Matching for SMT Solvers",
-  booktitle="Automated Deduction -- CADE-21",
-  year="2007",
-  publisher="Springer Berlin Heidelberg",
-  address="Berlin, Heidelberg",
-  pages="183--198",
-  abstract="Satisfiability Modulo Theories (SMT) solvers have proven highly scalable, efficient and suitable for integrating theory reasoning. However, for numerous applications from program analysis and verification, the ground fragment is insufficient, as proof obligations often include quantifiers. A well known approach for quantifier reasoning uses a matching algorithm that works against an E-graph to instantiate quantified variables. This paper introduces algorithms that identify matches on E-graphs incrementally and efficiently. In particular, we introduce an index that works on E-graphs, called E-matching code trees that combine features of substitution and code trees, used in saturation based theorem provers. E-matching code trees allow performing matching against several patterns simultaneously. The code trees are combined with an additional index, called the inverted path index, which filters E-graph terms that may potentially match patterns when the E-graph is updated. Experimental results show substantial performance improvements over existing state-of-the-art SMT solvers.",
-  isbn="978-3-540-73595-3"
-}
 
 %%%%%%%%%%%%%%%%%%%%% superoptimizers %%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -942,14 +768,6 @@ url="https://doi.org/10.1007/3-540-56883-2_11"
  booktitle = {ASPLOS},
  year = {1987},
 }
-
-@inproceedings{denali,
- author = {Joshi, Rajeev and Nelson, Greg and Randall, Keith},
- title = {Denali: a goal-directed superoptimizer},
- booktitle = {PLDI},
- year = {2002},
-}
-
 
 @inproceedings{Bansal:peephole,
  author = {Bansal, Sorav and Aiken, Alex},
@@ -1060,31 +878,6 @@ location = {London, UK},
 series = {PLDI 2020}
 }
 
-@inproceedings{szalinski,
-  title = {Synthesizing Structured {CAD} Models with Equality Saturation and Inverse Transformations},
-  author = {
-    Chandrakana Nandi and
-    Max Willsey and
-    Adam Anderson and
-    James R. Wilcox and
-    Eva Darulova and
-    Dan Grossman and
-    Zachary Tatlock
-  },
-  year = {2020},
-  isbn = {9781450376136},
-  publisher = {Association for Computing Machinery},
-  address = {New York, NY, USA},
-  url = {https://doi.org/10.1145/3385412.3386012},
-  doi = {10.1145/3385412.3386012},
-  booktitle = {Proceedings of the 41st ACM SIGPLAN Conference on Programming Language Design and Implementation},
-  pages = {31–44},
-  numpages = {14},
-  keywords = {Program Synthesis, Equality Saturation, Computer-Aided Design, Decompilation},
-  location = {London, UK},
-  series = {PLDI 2020},
-}
-
 @INPROCEEDINGS{vgg,  author={S. {Liu} and W. {Deng}},  booktitle={2015 3rd IAPR Asian Conference on Pattern Recognition (ACPR)},   title={Very deep convolutional neural network based image classification using small training sample size},   year={2015},  volume={},  number={},  pages={730-734},}
 
 @article{squeezenet,
@@ -1117,6 +910,7 @@ url = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-perf
 
 @misc{xla,
   title={{XLA} - {TensorFlow}, compiled}, url={https://developers.googleblog.com/2017/03/xla-tensorflow-compiled.html},
+  author={Google},
   journal={Google Developers Blog},
   year={2017},
   month={Mar}
