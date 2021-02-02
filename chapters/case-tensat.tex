@@ -115,35 +115,48 @@ The formulations in equality saturation becomes simpler if a graph is single-roo
 
 \begin{table}[t]
     \centering
-    \label{table:ops}
-    \begin{adjustbox}{width=\linewidth}
-    \begin{tabular}{llll}
+    \newcommand\act{\textsf{activation}}
+    \newcommand\width{\textsf{w}}
+    \newcommand\height{\textsf{h}}
+    {\textbf{Types}
+      \\[1mm]
+      \small
+    \begin{tabular}{cl|cl|cl|cl}
+      $T$ & Tensor
+      & $TT$ & Tensor tuple
+      & $W$ & Weights tensor
+      & $s_\height, s_\width$ & stride (height, width) \\
+      $n$ & natural number
+      & $p$  & padding
+      & $a$ & activation
+      & $k_\height, k_\width$ & kernel (height, width) \\
+    \end{tabular}}
+    \\[2em]
+    \begin{tabular}{lll}
+        {\bf Operator}  & {\bf Description}                    & {\bf Type signature} \\
     \hline
-        {\bf Operator}  & {\bf Description}                   & {\bf Inputs}                                                & {\bf Type signature} \\
-    \hline
-        ewadd           & Element-wise addition               & input$_1$, input$_2$                                        & $(T, T) \rightarrow T$ \\
-        ewmul           & Element-wise multiplication         & input$_1$, input$_2$                                        & $(T, T) \rightarrow T$ \\
-        matmul          & Matrix multiplication               & activation, input$_1$, input$_2$                            & $(N, T, T) \rightarrow T$ \\
-        conv $^a$       & Grouped convolution                 & stride$_h$, stride$_w$, pad., act., input, weight           & $(N, N, N, N, T, T) \rightarrow T$ \\
-        relu            & Relu activation                     & input                                                       & $T \rightarrow T$ \\
-        tanh            & Tanh activation                     & input                                                       & $T \rightarrow T$ \\
-        sigmoid         & Sigmoid activation                  & input                                                       & $T \rightarrow T$ \\
-        poolmax         & Max pooling                         & {input, kernel$_{\{h,w\}}$, stride$_{\{h,w\}}$, pad., act.} & $(T, N, N, N, N, N, N) \rightarrow T$ \\
-        poolavg         & Average pooling                     & {input, kernel$_{\{h,w\}}$, stride$_{\{h,w\}}$, pad., act.} & $(T, N, N, N, N, N, N) \rightarrow T$ \\
-        transpose $^b$  & Transpose                           & input, permutation                                          & $(T, S) \rightarrow T$ \\
-        enlarge $^c$    & Pad a convolution kernel with zeros & input, ref-input                                            & $(T, T) \rightarrow T$ \\
-        concat$_n$ $^d$ & Concatenate                         & axis, input$_1$, \dots, input$_n$                           & $(N, T, \dots, T) \rightarrow T$ \\
-        split $^e$      & Split a tensor into two             & axis, input                                                 & $(N, T) \rightarrow TT$ \\
-        split$_0$       & Get the first output from split     & input                                                       & $TT \rightarrow T$ \\
-        split$_1$       & Get the second output from split    & input                                                       & $TT \rightarrow T$ \\
-        merge $^f$      & Update weight to merge grouped conv & weight, count                                               & $(T, N) \rightarrow T$ \\
-        reshape $^g$    & Reshape tensor                      & input, shape                                                & $(T, S) \rightarrow T$ \\
-        input           & Input tensor                        & identifier $^h$                                             & $S \rightarrow T$ \\
-        weight          & Weight tensor                       & identifier $^h$                                             & $S \rightarrow T$ \\
-        noop $^i$       & Combine the outputs of the graph    & input$_1$, input$_2$                                        & $(T, T) \rightarrow T$ \\
-    \hline
+        \sf ewadd           & Element-wise addition                & $(T, T) \rightarrow T$ \\
+        \sf ewmul           & Element-wise multiplication          & $(T, T) \rightarrow T$ \\
+        \sf matmul          & Matrix multiplication                & $(a, T, T) \rightarrow T$ \\
+        \sf conv $^a$       & Grouped convolution                  & $(s_\height, s_\width, p, a, T, W) \rightarrow T$ \\
+        \sf relu            & Relu activation                      & $T \rightarrow T$ \\
+        \sf tanh            & Tanh activation                      & $T \rightarrow T$ \\
+        \sf sigmoid         & Sigmoid activation                   & $T \rightarrow T$ \\
+        \sf poolmax         & Max pooling                          & $(T, k_\height, k_\width, s_\height, s_\width, p, a) \rightarrow T$ \\
+        \sf poolavg         & Average pooling                      & $(T, k_\height, k_\width, s_\height, s_\width, p, a) \rightarrow T$ \\
+        \sf transpose $^b$  & Transpose                            & $(T, {\sf permutation}) \rightarrow T$ \\
+        \sf enlarge $^c$    & Pad a convolution kernel with zeros  & $(T, T_{\sf ref}) \rightarrow T$ \\
+        \sf concat$_n$ & Concatenate along the given axis     & $(n, T, \dots, T) \rightarrow T$ \\
+        \sf split $^d$      & Split a tensor into two along the axis & $(n, T) \rightarrow TT$ \\
+        \sf split$_0$       & Get the first output from split      & $TT \rightarrow T$ \\
+        \sf split$_1$       & Get the second output from split     & $TT \rightarrow T$ \\
+        \sf merge $^e$      & Update weight to merge grouped conv  & $(W, n) \rightarrow W$ \\
+        \sf reshape         & Reshape tensor                       & $(T, {\sf shape}) \rightarrow T$ \\
+        \sf input           & Input tensor                         & ${\sf identifier} \rightarrow T$ \\
+        \sf weight          & Weight tensor                        & ${\sf identifier} \rightarrow T$ \\
+        \sf noop            & Combine the outputs of the graph     & $(T, T) \rightarrow T$ \\
     \end{tabular}
-    \end{adjustbox}
+    \\[1em]
     \caption{
         Operators supported by \ourname.
         There are four types for the nodes in our representation:
@@ -154,17 +167,19 @@ The formulations in equality saturation becomes simpler if a graph is single-roo
          The more complex, variable-length parameters
           (e.g. shape, axes permutation) are represented using the
           string type according to the specified formats.
-          \\
-    \footnotesize{$^a$ Same representation as TASO \cite{taso}. Normal and depth-wise convolutions are special cases of grouped convolutions.} \\
-    \footnotesize{$^b$ Axis permutation for transpose is specified using a string with format: axis$_1$\_axis$_2$\_\dots .}\\
-    \footnotesize{$^c$ Pad a convolution kernel (input) with zeros to make it the same size as ref-input. }\\
-    \footnotesize{$^d$ Since each type of node needs to have a fixed number of inputs, we have a separate concat for each number of inputs. }\\
-    \footnotesize{$^e$ Split the tensor in the given axis. The position of the split is at the place of the most recent concat. }\\
-    \footnotesize{$^f$ Merge every \textit{count} number of groups in the grouped convolution. See TASO \cite{taso} for more details. }\\
-    \footnotesize{$^g$ Specify the target shape using a string with format: dim$_1$\_dim$_2$\_\dots .}\\
-    \footnotesize{$^h$ The identifier for an input or weight tensor contains its name and shape, specified as a string with format: name@dim$_1$\_dim$_2$\_\dots .}\\
-    \footnotesize{$^i$ For combining the outputs of the graph to make the graph single-rooted. No actual operator is associated with noop.}
-  }
+          \\[1em]
+          \footnotesize{
+            $^a$ Same representation as TASO \cite{taso}.
+                 Normal and depth-wise convolutions are special cases
+                 of grouped convolutions. \\
+            $^b$ Axis permutation for transpose is specified
+                 using a string with format: axis$_1$\_axis$_2$\_\dots .\\
+            $^c$ Pad a convolution kernel (input) with
+                 zeros to make it the same size as input $T_{\sf ref}$ \\
+            $^d$ Split the tensor in the given axis. The position of the split is at the place of the most recent concat. \\
+            $^e$ Merge every \textit{count} number of groups in the grouped convolution. See TASO \cite{taso} for more details. \\
+          }
+    }\label{table:ops}
 \end{table}
 
 
