@@ -4,12 +4,20 @@
 \newcommand{\ourname}{Tensat}
 
 Deep learning frameworks and compilers
-%(e.g., Tensorflow~\cite{TensorFlow}, PyTorch~\cite{NEURIPS2019_9015}, XLA~\cite{xla}, TensorRT~\cite{TensorRT}, TVM~\cite{TVM}, MLIR~\cite{mlir} etc.)
-have enabled diverse kinds of machine learning models to run efficiently on numerous compute platforms. Neural network models in these frameworks are  typically represented as tensor computation graphs. To improve the runtime performance of a tensor graph, these frameworks perform various optimizations.
+ (e.g., Tensorflow~\cite{TensorFlow}, PyTorch~\cite{NEURIPS2019_9015},
+  XLA~\cite{xla}, TensorRT~\cite{TensorRT}, TVM~\cite{TVM},
+  MLIR~\cite{mlir})
+ have enabled diverse kinds of machine learning models to run
+ efficiently on numerous compute platforms.
+Neural network models in
+ these frameworks are typically represented as tensor computation
+ graphs.
+To improve the runtime performance of a tensor graph, these
+ frameworks perform various optimizations.
 
 One of the most important optimizations is graph rewriting,
-which takes in a tensor graph $g$ and a set of semantics-preserving graph rewrites $R$,
-and by applying rewrites to $g$ seeks to find an semantically equivalent $g'$ with lower cost according to some cost model.
+ which takes in a tensor graph $g$ and a set of semantics-preserving graph rewrites $R$,
+ and by applying rewrites to $g$ seeks to find an semantically equivalent $g'$ with lower cost according to some cost model.
 % which transforms a tensor graph by iteratively applying rewrite rules that substitute subgraphs with semantically equivalent ones.
 %The graph rewriting optimization problem can be factored into two sub-problems: (1) discovering a comprehensive set of rewrite rules and (2) an algorithm that determines the order in which to apply the rewrite rules to optimize a given graph.
 The current industry-standard approach adopted by most frameworks is to use a manually curated set of rewrite rules and rely on a heuristic strategy to determine the order in which to apply the rewrite rules.
@@ -106,45 +114,47 @@ The formulations in equality saturation becomes simpler if a graph is single-roo
 
 
 \begin{table}[t]
-    \small
-    {\centering
-    \caption{Operators supported by \ourname.
-    There are four types for the nodes in our representation:
-    tensor type (T), string type (S), integer type (N), and tensor tuple type (TT).
-    The integer type is used to represent parameters of the operators, such as stride, axis, and also padding and activation modes (by representing different modes using different integers).
-    The more complex, variable-length parameters (e.g. shape, axes permutation) are represented using the string type according to the specified formats. }
+    \centering
     \label{table:ops}
-    \begin{tabular}{cccc}
+    \begin{adjustbox}{width=\linewidth}
+    \begin{tabular}{llll}
     \hline
-        {\bf Operator} & {\bf Description} & {\bf Inputs} & {\bf Type signature} \\
+        {\bf Operator}  & {\bf Description}                   & {\bf Inputs}                                                & {\bf Type signature} \\
     \hline
-        ewadd & Element-wise addition & input$_1$, input$_2$ & (T, T) $\rightarrow$ T  \\
-        ewmul & Element-wise multiplication & input$_1$, input$_2$ & (T, T) $\rightarrow$ T \\
-        matmul & Matrix multiplication & activation, input$_1$, input$_2$ & (N, T, T) $\rightarrow$ T \\
-        conv $^a$ & Grouped convolution & stride$_h$, stride$_w$, pad., act., input, weight & (N, N, N, N, T, T) $\rightarrow$ T \\
-        relu & Relu activation & input & T $\rightarrow$ T \\
-        tanh & Tanh activation & input & T $\rightarrow$ T \\
-        sigmoid & Sigmoid activation & input & T $\rightarrow$ T \\
-        poolmax & Max pooling & {input, kernel$_{\{h,w\}}$, stride$_{\{h,w\}}$, pad., act.}  & (T, N, N, N, N, N, N) $\rightarrow$ T \\
-        poolavg & Average pooling & {input, kernel$_{\{h,w\}}$, stride$_{\{h,w\}}$, pad., act.} & (T, N, N, N, N, N, N) $\rightarrow$ T \\
-        transpose $^b$ & Transpose & input, permutation & (T, S) $\rightarrow$ T \\
-        enlarge $^c$ & Pad a convolution kernel with zeros & input, ref-input & (T, T) $\rightarrow$ T \\
-        concat$_n$ $^d$ & Concatenate & axis, input$_1$, \dots, input$_n$ & (N, T, \dots, T) $\rightarrow$ T \\
-        split $^e$ & Split a tensor into two & axis, input & (N, T) $\rightarrow$ TT \\
-        split$_0$ & Get the first output from split & input & TT $\rightarrow$ T \\
-        split$_1$ & Get the second output from split & input & TT $\rightarrow$ T \\
-        merge $^f$ & Update weight to merge grouped conv & weight, count & (T, N) $\rightarrow$ T \\
-        reshape $^g$ & Reshape tensor & input, shape & (T, S) $\rightarrow$ T \\
-        input & Input tensor & identifier $^h$ & S $\rightarrow$ T \\
-        weight & Weight tensor & identifier $^h$ & S $\rightarrow$ T \\
-        noop $^i$ & Combine the outputs of the graph & input$_1$, input$_2$ & (T, T) $\rightarrow$ T \\
+        ewadd           & Element-wise addition               & input$_1$, input$_2$                                        & $(T, T) \rightarrow T$ \\
+        ewmul           & Element-wise multiplication         & input$_1$, input$_2$                                        & $(T, T) \rightarrow T$ \\
+        matmul          & Matrix multiplication               & activation, input$_1$, input$_2$                            & $(N, T, T) \rightarrow T$ \\
+        conv $^a$       & Grouped convolution                 & stride$_h$, stride$_w$, pad., act., input, weight           & $(N, N, N, N, T, T) \rightarrow T$ \\
+        relu            & Relu activation                     & input                                                       & $T \rightarrow T$ \\
+        tanh            & Tanh activation                     & input                                                       & $T \rightarrow T$ \\
+        sigmoid         & Sigmoid activation                  & input                                                       & $T \rightarrow T$ \\
+        poolmax         & Max pooling                         & {input, kernel$_{\{h,w\}}$, stride$_{\{h,w\}}$, pad., act.} & $(T, N, N, N, N, N, N) \rightarrow T$ \\
+        poolavg         & Average pooling                     & {input, kernel$_{\{h,w\}}$, stride$_{\{h,w\}}$, pad., act.} & $(T, N, N, N, N, N, N) \rightarrow T$ \\
+        transpose $^b$  & Transpose                           & input, permutation                                          & $(T, S) \rightarrow T$ \\
+        enlarge $^c$    & Pad a convolution kernel with zeros & input, ref-input                                            & $(T, T) \rightarrow T$ \\
+        concat$_n$ $^d$ & Concatenate                         & axis, input$_1$, \dots, input$_n$                           & $(N, T, \dots, T) \rightarrow T$ \\
+        split $^e$      & Split a tensor into two             & axis, input                                                 & $(N, T) \rightarrow TT$ \\
+        split$_0$       & Get the first output from split     & input                                                       & $TT \rightarrow T$ \\
+        split$_1$       & Get the second output from split    & input                                                       & $TT \rightarrow T$ \\
+        merge $^f$      & Update weight to merge grouped conv & weight, count                                               & $(T, N) \rightarrow T$ \\
+        reshape $^g$    & Reshape tensor                      & input, shape                                                & $(T, S) \rightarrow T$ \\
+        input           & Input tensor                        & identifier $^h$                                             & $S \rightarrow T$ \\
+        weight          & Weight tensor                       & identifier $^h$                                             & $S \rightarrow T$ \\
+        noop $^i$       & Combine the outputs of the graph    & input$_1$, input$_2$                                        & $(T, T) \rightarrow T$ \\
     \hline
     \end{tabular}
-    }
-    \captionsetup{labelformat=empty, labelsep=colon}
-    \vskip 0.2em
-
-    %\caption*{
+    \end{adjustbox}
+    \caption{
+        Operators supported by \ourname.
+        There are four types for the nodes in our representation:
+        tensor type (T), string type (S), integer type (N), and tensor tuple type (TT).
+        The integer type is used to represent parameters of the
+         operators, such as stride, axis, and also padding and activation modes
+         (by representing different modes using different integers).
+         The more complex, variable-length parameters
+          (e.g. shape, axes permutation) are represented using the
+          string type according to the specified formats.
+          \\
     \footnotesize{$^a$ Same representation as TASO \cite{taso}. Normal and depth-wise convolutions are special cases of grouped convolutions.} \\
     \footnotesize{$^b$ Axis permutation for transpose is specified using a string with format: axis$_1$\_axis$_2$\_\dots .}\\
     \footnotesize{$^c$ Pad a convolution kernel (input) with zeros to make it the same size as ref-input. }\\
@@ -154,7 +164,7 @@ The formulations in equality saturation becomes simpler if a graph is single-roo
     \footnotesize{$^g$ Specify the target shape using a string with format: dim$_1$\_dim$_2$\_\dots .}\\
     \footnotesize{$^h$ The identifier for an input or weight tensor contains its name and shape, specified as a string with format: name@dim$_1$\_dim$_2$\_\dots .}\\
     \footnotesize{$^i$ For combining the outputs of the graph to make the graph single-rooted. No actual operator is associated with noop.}
-    %}
+  }
 \end{table}
 
 
