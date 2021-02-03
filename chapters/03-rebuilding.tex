@@ -486,13 +486,9 @@ This provides a one-to-one comparison of deferred rebuilding against the
   orthogonal performance improvements.
 
 \begin{figure}
-  \begin{subfigure}{0.49\linewidth}
-    \includegraphics[width=\linewidth]{speedup}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.49\linewidth}
-    \includegraphics[width=\linewidth]{speedup-log}
-  \end{subfigure}
+  \centering
+  \includegraphics[width=0.7\linewidth]{speedup}
+  \includegraphics[width=0.7\linewidth]{speedup-log}
   \caption{
     Rebuilding once per iteration---as opposed to after every merge---significantly
       speeds up congruence maintenance.
@@ -505,11 +501,12 @@ This provides a one-to-one comparison of deferred rebuilding against the
     The linear scale plot shows that deferred rebuilding is significantly faster.
     The log scale plot suggests the speedup is greater than some constant multiple;
       \autoref{fig:eval-iter} demonstrates this in greater detail.
-  }
-  \label{fig:eval}
+  }\label{fig:eval}
+\end{figure}
 
-  \begin{minipage}[t]{0.48\linewidth}
-  \includegraphics[width=\linewidth]{speedup-iter}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\linewidth]{speedup-iter}
   \caption{
     As more rewrites are applied, deferring rebuilding gives greater speedup.
     Each line represents a single test: each equality saturation iteration plots
@@ -520,10 +517,9 @@ This provides a one-to-one comparison of deferred rebuilding against the
       the problem size.
   }
   \label{fig:eval-iter}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{0.48\linewidth}
-  \includegraphics[width=\linewidth]{repairs}
+  \vspace{1em}
+
+  \includegraphics[width=0.6\linewidth]{repairs}
   \caption{
     The time spent in congruence maintenance correlates with the number of calls
     to the \texttt{repair} method.
@@ -531,7 +527,6 @@ This provides a one-to-one comparison of deferred rebuilding against the
     indicating that the two quantities are indeed positively correlated.
   }
   \label{fig:repair-plot}
-  \end{minipage}
 \end{figure}
 
 

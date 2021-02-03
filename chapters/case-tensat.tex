@@ -35,7 +35,6 @@ this classically tricky problem is known in the compilers community as the ``pha
 
 \begin{table}[]
     \centering
-    \footnotesize
     \begin{tabular}{ccc|cc}
     \hline
     & \multicolumn{2}{c|}{\bf Search time (s)} & \multicolumn{2}{c}{\bf Runtime speedup (\%)} \\
@@ -482,27 +481,21 @@ Increasing to $n=1000$ leads to less than 1\% speedup gain with the cost of over
 
 
 \begin{figure}
-\begin{minipage}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{tensat/all_speedup.pdf}
-    \caption{
-        Speedup percentage of the optimized graph with respect to the original graph, TASO v.s. \ourname{}.
-        Each setting (optimizer $\times$ benchmark) is run for five times, and we plot the mean and standard error for the measurements.
-    }
-    \label{fig:speedup}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{tensat/all_optim_time.pdf}
-    \caption{
-        Comparison of the optimization time (log scale) between TASO and \ourname{}.
-        ``TASO total'' is the total time of TASO search.
-        ``TASO best'' indicates when TASO found its best result;
-        achieving this time would require an oracle telling it when to stop.
-    }
-    \label{fig:overhead}
-\end{minipage}
+  \centering
+  \includegraphics[height=8cm]{tensat/all_speedup.pdf}
+  \caption{
+    Speedup percentage of the optimized graph with respect to the original graph, TASO v.s. \ourname{}.
+    Each setting (optimizer $\times$ benchmark) is run for five times, and we plot the mean and standard error for the measurements.
+  }\label{fig:speedup}
+  \vspace{2em}
+
+  \includegraphics[height=8cm]{tensat/all_optim_time.pdf}
+  \caption{
+    Comparison of the optimization time (log scale) between TASO and \ourname{}.
+    ``TASO total'' is the total time of TASO search.
+    ``TASO best'' indicates when TASO found its best result;
+    achieving this time would require an oracle telling it when to stop.
+  }\label{fig:overhead}
 \end{figure}
 
 \subsubsection{Program Speedup}

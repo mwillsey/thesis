@@ -223,38 +223,35 @@ These are collectively referred to as the \textit{e-graph invariants}.
 %   additional equivalences are found.
 
 \begin{figure}
-  \begin{subfigure}[t]{0.175\linewidth}
+  \begin{subfigure}[t]{0.45\linewidth}
     \centering
-    \includegraphics[height=30mm]{overview1.pdf}
-    \caption{\Egraph contains ${(a \times 2) / 2}$.}
+    \includegraphics[height=50mm]{overview1.pdf}
+    \caption{Initial \egraph contains ${(a \times 2) / 2}$.}
     \label{fig:egraph-rewrite1}
   \end{subfigure}
   \hfill
-  \begin{subfigure}[t]{0.23\linewidth}
+  \begin{subfigure}[t]{0.45\linewidth}
     \centering
-    \includegraphics[height=30mm]{overview2.pdf}
+    \includegraphics[height=50mm]{overview2.pdf}
     \caption{
       Applied ${x \times 2 \to x \ll 1}$.
-    }
-    \label{fig:egraph-rewrite2}
+    }\label{fig:egraph-rewrite2}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.23\linewidth}
+  \\[1em]
+  \begin{subfigure}[t]{0.45\linewidth}
     \centering
-    \includegraphics[height=30mm]{overview3.pdf}
+    \includegraphics[height=50mm]{overview3.pdf}
     \caption{
       Applied rewrite ${(x \times y) / z \to x \times (y / z)}$.
-    }
-    \label{fig:egraph-rewrite3}
+    }\label{fig:egraph-rewrite3}
   \end{subfigure}
   \hfill
-  \begin{subfigure}[t]{0.24\linewidth}
+  \begin{subfigure}[t]{0.45\linewidth}
     \centering
-    \includegraphics[height=30mm]{overview4.pdf}
+    \includegraphics[height=50mm]{overview4.pdf}
     \caption{
       Applied ${x / x \to 1}$ and ${1 \times x \to x}$.
-    }
-    \label{fig:egraph-rewrite4}
+    }\label{fig:egraph-rewrite4}
   \end{subfigure}
   \caption{
     An \egraph consists of \eclasses (dashed boxes) containing
@@ -359,13 +356,8 @@ This eliminates the problem of choosing the right rule, but
   rewriting efficiently using an \egraph.
 
 \begin{figure}
-  \begin{minipage}{0.48\linewidth}
-    \centering
-    \includegraphics[width=0.9\linewidth]{eqsat}
-  \end{minipage}
-  \hfill
-  \begin{minipage}{0.46\linewidth}
-  \begin{lstlisting}[language=Python, gobble=4, numbers=left, basicstyle=\scriptsize\ttfamily]
+  \centering
+  \begin{lstlisting}[language=Python, gobble=4, numbers=left, basicstyle=\small\ttfamily, xleftmargin=40mm]
     def equality_saturation(expr, rewrites):
       egraph = initial_egraph(expr)
 
@@ -378,9 +370,10 @@ This eliminates the problem of choosing the right rule, but
 
       return egraph.extract_best()
   \end{lstlisting}
-  \end{minipage}
+  \vspace{2em}
+  \includegraphics[width=0.6\linewidth]{eqsat}
   \caption{
-    Box diagram and pseudocode for equality saturation.
+    Pseudocode and box diagram for equality saturation.
     Traditionally, equality saturation maintains the \egraph data structure
       invariants throughout the algorithm.
   }
