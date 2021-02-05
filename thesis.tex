@@ -23,7 +23,7 @@
 \usepackage[T1]{fontenc}
 
 \usepackage[font={sf}]{caption}
-\usepackage{subcaption}
+\usepackage[subrefformat=parens]{subcaption}
 
 \usepackage{multirow}
 
@@ -35,6 +35,9 @@
 \newtheorem{definition}{Definition}[chapter]
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{proof}{Proof}[chapter]
+
+\usepackage{todonotes}
+\renewcommand\max[1]{\todo[color=orange]{#1}}
 
 \usepackage{libertine}
 \usepackage[scaled=.9]{DejaVuSansMono}

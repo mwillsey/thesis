@@ -1,10 +1,45 @@
 \chapter{Case Studies}
 \label{sec:case-studies}
 
- \input{chapters/case-szalinski}
- \section{Rewrite Synthesis}
- \input{chapters/case-herbie}
- \input{chapters/case-tensat}
+This thesis makes the case that equality saturation
+ (and \egg in particular)
+ is the right tool for
+ many program optimization and synthesis tasks.
+The preceding chapters have articulated the
+ technical novelties, practical features,
+ and quantitative evidence that supports this claim.
+This section provides qualitative evidence through case studies
+ of independently-developed, published\footnotemark{}
+ projects from diverse domains
+ that incorporated \egg.
+
+In some cases, the developers had first rolled their own \egraph
+ implementations;
+ \egg allowed them to delete code, gain performance, and in some cases
+ dramatically broaden the project's scope thanks to \egg's speed and
+ flexibility.
+In addition to gaining performance, all projects use \egg's novel
+  extensibility features like \eclass analyses and dynamic/conditional rewrites.
+
+\footnotetext{
+  The case studies feature the following works:
+  \\
+  \begin{tabular}{llll}
+    Szalinski \cite{szalinski} & \autoref{sec:szalinski} & PLDI 2020
+    & Nandi, \textbf{Willsey}, Anderson, Wilcox, Darulova, Grossman, Tatlock
+    \\
+    Herbie \cite{herbie} & \autoref{sec:herbie} & PLDI 2015
+    & Panchekha, Sanchez-Stern, Wilcox, Tatlock
+    \\
+    Tensat \cite{tensat} & \autoref{sec:tensat} & MLSys 2021
+    & Yang, Phothilimtha, Wang, \textbf{Willsey}, Roy, Pienaar
+  \end{tabular}
+}
+
+ \include{chapters/case-szalinski}
+ % \section{Rewrite Synthesis}
+ \include{chapters/case-herbie}
+ \include{chapters/case-tensat}
 
 %%% Local Variables:
 %%% TeX-master: "../thesis"

@@ -1,6 +1,64 @@
 \section{Szalinski: Decompiling CAD into Structured Programs}
 \label{sec:szalinski}
 
+\newcommand{\cadilac}{Caddy\xspace}
+\newcommand{\caddy}{Caddy\xspace}
+\newcommand{\mtoc}{Mesh-to-CSG\xspace}
+\newcommand{\csg}{\ensuremath{\mathit{csg}}\xspace}
+\newcommand{\fuel}{\ensuremath{\mathit{fuel}}\xspace}
+\newcommand{\affine}{\textsf{Affine}\xspace}
+\newcommand{\binop}{\textsf{Binop}\xspace}
+\newcommand{\mesh}{\textsf{Mesh}\xspace}
+\newcommand{\fold}{\textsf{Fold}\xspace}
+\newcommand{\foldu}{\textsf{Foldunion}\xspace}
+\newcommand{\foldi}{\textsf{Foldinter}\xspace}
+\newcommand{\map}{\textsf{Map2}\xspace}
+\newcommand{\maptwo}{\textsf{Map2}\xspace}
+\newcommand{\maps}{\textsf{Map2}\textsf{s}\xspace}
+\newcommand{\mapi}{\textsf{Tabulate}\xspace}
+\newcommand{\mapis}{\textsf{Tabulate}\textsf{s}\xspace}
+\newcommand{\rpt}{\textsf{Repeat}\xspace}
+\newcommand{\rpts}{\textsf{Repeats}\xspace}
+\newcommand{\topk}{top-\textit{k}\xspace}
+\newcommand{\emp}{\textsf{Empty}\xspace}
+\newcommand{\unit}{\textsf{Cuboid}\xspace}
+\newcommand{\sph}{\textsf{Sphere}\xspace}
+\newcommand{\cyl}{\textsf{Cylinder}\xspace}
+\newcommand{\hx}{\textsf{Hexprism}\xspace}
+\newcommand{\scale}{\textsf{Scale}\xspace}
+\newcommand{\rotate}{\textsf{Rotate}\xspace}
+\newcommand{\trans}{\textsf{Translate}\xspace}
+\newcommand{\polar}{\textsf{TranslateSpherical}\xspace}
+\newcommand{\union}{\textsf{Union}\xspace}
+\newcommand{\unions}{\textsf{Unions}\xspace}
+\newcommand{\diff}{\textsf{Difference}\xspace}
+\newcommand{\inter}{\textsf{Intersection}\xspace}
+\newcommand{\hull}{\textsf{Hull}\xspace}
+\newcommand{\slist}{\textsf{List}\xspace}
+\newcommand{\slists}{\textsf{Lists}\xspace}
+\newcommand{\nil}{\textsf{Nil}\xspace}
+\newcommand{\cons}{\textsf{Cons}\xspace}
+\newcommand{\concat}{\textsf{Concat}\xspace}
+\newcommand{\sdo}{\textsf{Do}\xspace}
+\newcommand{\undo}{\textsf{Undo}\xspace}
+\newcommand{\unpolar}{\textsf{Unspherical}\xspace}
+\newcommand{\unsort}{\textsf{Unsort}\xspace}
+\newcommand{\ssort}{\textsf{Sort}\xspace}
+\newcommand{\unpart}{\textsf{Unpart}\xspace}
+\newcommand{\spart}{\textsf{Part}\xspace}
+\newcommand{\Semtag}{Inverse transformations\xspace}
+\newcommand{\semtag}{inverse transformations\xspace}
+\newcommand{\semt}{inverse transformation\xspace}
+\newcommand{\semts}{inverse transformations\xspace}
+
+\lstdefinestyle{caddy}{
+  basicstyle=\sffamily,
+  columns=flexible,
+  showstringspaces=false,
+  mathescape,
+  escapechar=|,
+}
+
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{sz-overview}
@@ -73,6 +131,73 @@ A recent tool, \sz~\cite{szalinski},
     lists that expose any latent structure
 
 \end{itemize}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.48\linewidth}
+    \centering
+    \includegraphics[height=40mm]{sz/shipwheel.png}
+    \caption{CAD model of ship's wheel}
+    \label{fig:ship-cad}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\linewidth}
+    \begin{lstlisting}[style=caddy, xleftmargin=10mm]
+(Union
+ (Cylinder |[1, 5, 5]|)
+ (Fold Union
+  (Tabulate (i 6)
+   (Rotate |[0, 0, 60 * i]|
+    (Translate |[1, -0.5, 0]|
+     (Cuboid |[10, 1, 1]|))))))
+    \end{lstlisting}
+    \caption{\caddy program}
+    \label{fig:ship-prog}
+  \end{subfigure}
+  \vspace{1em}
+
+  \begin{subfigure}{\linewidth}
+    \begin{lstlisting}[style=caddy, xleftmargin=25mm]
+(Union
+ (Cylinder |[1,5]|)
+ (Union
+  (Rotate |[0,0,0]|   (Translate |[1,-0.5,0]| (Cuboid |[10,1,1]|)))
+  (Rotate |[0,0,60]|  (Translate |[1,-0.5,0]| (Cuboid |[10,1,1]|)))
+  (Rotate |[0,0,120]| (Translate |[1,-0.5,0]| (Cuboid |[10,1,1]|)))
+  (Rotate |[0,0,180]| (Translate |[1,-0.5,0]| (Cuboid |[10,1,1]|)))
+  (Rotate |[0,0,240]| (Translate |[1,-0.5,0]| (Cuboid |[10,1,1]|)))
+  (Rotate |[0,0,300]| (Translate |[1,-0.5,0]| (Cuboid |[10,1,1]|)))))
+    \end{lstlisting}
+    \caption{
+      Ideal Core \caddy expression that exposes structure
+    }\label{fig:ship-csg-good}
+  \end{subfigure}
+  %%
+  \begin{subfigure}{\linewidth}
+    \begin{lstlisting}[style=caddy, xleftmargin=20mm]
+(Union
+  (Rotate    |[0,0,120]|  (Translate |[1,-0.5,0]|   (Cuboid |[10,1,1]|)))
+  (Scale     |[10,1,1]|   (Translate |[0.1,-0.5,1]| (Cuboid |[1,1,1]|)))
+  (Rotate    |[0,0,300]|  (Translate |[1,-0.5,0]|   (Cuboid |[10,1,1]|)))
+  (Scale     |[5,5,1]|    (Cylinder  |[1,1]|))
+  (Translate |[-1,0.5,0]|  (Scale     |[-1,-1,1]|    (Cuboid |[10,1,1]|)))
+  (Rotate    |[0,0,240]|  (Translate |[1,-0.5,0]|   (Cuboid |[10,1,1]|)))
+  (Rotate    |[0,0,60]|   (Translate |[1,-0.5,0]|   (Cuboid |[10,1,1]|))))
+    \end{lstlisting}
+    \caption{
+      Equivalent Core \caddy expression that obfuscates structure
+    }\label{fig:ship-csg-bad}
+  \end{subfigure}
+
+  \caption{
+    \subref{fig:ship-cad} CAD model for a ship's wheel.
+    \subref{fig:ship-prog} \caddy features like \mapi express
+      repeated design components.
+    Such repetition can be obvious in
+      Core Caddy \subref{fig:ship-csg-good},
+      but existing mesh decompilers
+      obfuscate structure \subref{fig:ship-csg-bad}.
+  }\label{fig:ship}
+\end{figure}
 
 \subsection{Implementation}
 
