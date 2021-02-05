@@ -1,4 +1,4 @@
-\documentclass[12pt, oneside]{report}
+\documentclass[12pt]{book}
 
 \usepackage{hyperref}
 \def\chapterautorefname{Chapter}
@@ -14,7 +14,7 @@
 \newcommand{\algorithmautorefname}{Algorithm} % autoref
 
 \usepackage{adjustbox}
-\usepackage{fullpage}
+\usepackage[headings]{fullpage}
 \usepackage{xargs}
 \usepackage{xspace}
 \usepackage[doublespacing]{setspace}
@@ -38,6 +38,13 @@
 
 \usepackage{todonotes}
 \renewcommand\max[1]{\todo[color=orange]{#1}}
+
+% \usepackage{fancyhdr}
+% \setlength{\headheight}{15.2pt}
+% \pagestyle{fancy}
+% \lhead{Max Willsey}
+% % \chead[<even output>]{<odd output>}
+% \rhead{\thechapter. \chaptername}
 
 \usepackage{libertine}
 \usepackage[scaled=.9]{DejaVuSansMono}
@@ -130,7 +137,6 @@
 \end{center}
 
 \pagestyle{plain}
-
 \setcounter{page}{1}
 \pagenumbering{roman}
 
@@ -141,25 +147,31 @@
   \mytitle                 \\[1em]
   \myauthor                \\[1em]
 
+  % Supervisory Committee: \\[-0.5em]
+  % Luis Ceze, Chair \qquad
+  % Adriana Schulz   \qquad
+  % Zachary Tatlock  \\[-0.5em]
   Chair of the Supervisory Committee: \\[-0.5em]
-  Professor Luis Ceze                 \\[-0.5em]
+  Luis Ceze \\[-0.5em]
   Computer Science \& Engineering
   \\[2em]
 \end{center}
 \input{abstract}
-\clearpage
 
 \begin{spacing}{1.5}
   \tableofcontents
 \end{spacing}
 
-\chapter*{Acknowledgements}
+\chapter*{Acknowledgments}
 Thanks to some people.
 
 \clearpage
+
+\pagestyle{headings}
 \setcounter{page}{1}
 \pagenumbering{arabic}
-
+\renewcommand{\chaptermark}[1]{\markboth{\sc{\chaptername\ \thechapter.\ #1}}{}}
+\renewcommand{\sectionmark}[1]{\markright{\sc{\thesection.\ #1}}{}}
 \input{chapters/01-intro}
 \input{chapters/02-background}
 \input{chapters/03-rebuilding}
