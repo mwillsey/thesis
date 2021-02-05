@@ -1,6 +1,52 @@
 \chapter{Introduction}
 \label{sec:intro}
 
+At the heart of programming languages
+ lies the question of how to represent and manipulate programs.
+Nearly all aspects of programming language work---including
+ theorem proving, optimizing compilers, and program synthesis---%
+ depend on these fundamental notions,
+ since they dictate
+ how (and how efficiently!) a tool may
+ store and work with programs.
+The choice of how to represent and manipulate programs
+ largely determines the the efficacy of a tool or technique.
+
+The most common and easily understood
+ program representation is the venerable
+ \textit{abstract syntax tree} (AST).
+An AST is a recursive tree data structure
+ where a nodes is an operator and
+ some number---potential zero---of children ASTs.
+For example, the program $(a * 2) / 2$
+ is represented by the AST shown in \autoref{fig:ast1}.
+ASTs are the primary data structures used in most programming tools,
+ but they are not the only ones.
+The most common alternate representation is the \textit{term graph},
+ which can be viewed as a variant of ASTs that loosens the tree requirement.
+Term graphs can there for capture sharing across common parts of a
+ program (also known as a term).
+\autoref{fig:ast2} shows a term graph for the program $(a * 2) / 2$.
+
+\begin{figure}
+  \subcaptionbox{AST without sharing.\label{fig:ast1}}
+    [0.5\linewidth]{\includegraphics[height=3cm]{ast}}
+  \subcaptionbox{Term graph with sharing.\label{fig:ast2}}
+    [0.5\linewidth]{\includegraphics[height=3cm]{ast-sharing}}
+  \caption{
+    Different representations of the program $(a * 2) / 2$ have
+     different characteristics.
+    The syntax tree is simpler \subref{fig:ast1},
+     but the term graph is smaller since it captures sharing \subref{fig:ast2}.
+  }\label{fig:ast}
+\end{figure}
+
+\begin{quote}
+  \it\Thesisstmt
+\end{quote}
+
+\hrule
+
 Equality graphs (\egraphs) were originally developed to
   efficiently represent congruence relations
   in automated theorem provers (ATPs).
