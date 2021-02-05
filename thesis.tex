@@ -39,14 +39,8 @@
 \usepackage{todonotes}
 \renewcommand\max[1]{\todo[color=orange]{#1}}
 
-% \usepackage{fancyhdr}
-% \setlength{\headheight}{15.2pt}
-% \pagestyle{fancy}
-% \lhead{Max Willsey}
-% % \chead[<even output>]{<odd output>}
-% \rhead{\thechapter. \chaptername}
-
 \usepackage{libertine}
+\usepackage[libertine]{newtxmath}
 \usepackage[scaled=.9]{DejaVuSansMono}
 
 \usepackage{listings}
@@ -91,6 +85,14 @@
 
 \title{\mytitle}
 \author{\myauthor}
+
+\newcommand\thesisstmt{%
+  e-graphs and equality saturation are compelling techniques for
+  program representation and manipulation that should now be considered
+  for many types of programming tools across domains.
+}
+
+\newcommand\Thesisstmt{\expandafter\MakeUppercase \thesisstmt}
 
 \input{macros}
 
@@ -178,6 +180,7 @@ Thanks to some people.
 \input{chapters/04-analyses}
 \input{chapters/05-egg}
 \input{chapters/06-case-studies}
+\input{chapters/99-conclusion}
 
 \clearpage
 \addcontentsline{toc}{chapter}{Bibliography}
