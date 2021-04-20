@@ -1,17 +1,35 @@
-An \egraph efficiently represents
-  a congruence relation over many expressions.
-Although they were originally developed in the late 1970s
-  for use in automated theorem provers,
-  a more recent technique known as \textit{equality saturation}
-  repurposes \egraphs to implement state-of-the-art,
-  rewrite-driven compiler optimizations and program synthesizers.
-However, \egraphs remain unspecialized for this newer use case.
-Equality saturation workloads exhibit distinct characteristics and
-  often require ad~hoc \egraph extensions to
-  incorporate transformations beyond purely syntactic rewrites.
+% An \egraph efficiently represents
+%   a congruence relation over many expressions.
+% Although they were originally developed in the late 1970s
+%   for use in automated theorem provers,
+%   a more recent technique known as \textit{equality saturation}
+%   repurposes \egraphs to implement state-of-the-art,
+%   rewrite-driven compiler optimizations and program synthesizers.
+% However, \egraphs remain unspecialized for this newer use case.
+% Equality saturation workloads exhibit distinct characteristics and
+%   often require ad~hoc \egraph extensions to
+%   incorporate transformations beyond purely syntactic rewrites.
 
-This work contributes two techniques that make
-  \egraphs fast and extensible, specializing them to equality saturation.
+Programming language tools like
+ compilers, optimizers, verifiers, and synthesizers
+ rely on term rewriting to effectively manipulate programs.
+While powerful and well-studied,
+ term rewriting traditionally suffers from a critical stumbling block:
+ users must \textit{choose} when and how to apply the right rewrite,
+ and the quality of the results hinges on this difficult decision.
+A recent technique called \textit{equality saturation}
+ mitigates this ``rewrite choice'' issue
+ by allowing many rewrites to apply simultaneously.
+Despite its promise, the technique's applicability has been limited by
+ lack of flexibility and poor scalability.
+This thesis offers theoretical and practical advances that make
+ \eqsat fast and flexible enough
+ to use in real-world applications in any domain.
+
+On the theoretical side,
+ this work contributes two techniques
+ to make \egraphs, the data structure underlying \eqsat,
+ better suited to the algorithm's needs.
 A new amortized invariant restoration technique called \textit{rebuilding}
   takes advantage of equality saturation's distinct workload,
   providing asymptotic speedups over current techniques in practice.
@@ -21,11 +39,21 @@ A general mechanism called \textit{\eclass analyses}
 
 We implemented these techniques in
   a new open-source library called \egg.
-Our case studies on
-  three previously published applications of equality saturation
-  highlight how \egg's performance and flexibility
-  enable state-of-the-art results across diverse domains.
+\egg has been used to achieve state-of-the-art
+ results in many domains, including
+  floating point accuracy,
+  automatic vectorization,
+  deep learning compute graphs,
+  3D CAD decompilation,
+  and
+  linear algebra kernels,
+  among others.
+We present case studies
+  that highlight how \egg's performance and flexibility
+  helped these projects succeed,
+  making the case that \eqsat is ready for
+  a wide variety of real-world use cases.
 
 %%% Local Variables:
-%%% TeX-master: "thesis"
+%%% TeX-master: "./thesis"
 %%% End:
