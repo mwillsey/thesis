@@ -1,6 +1,91 @@
 \chapter{Background}
 \label{sec:background}
 
+\section{Term Representation and Rewriting}
+
+The most common and easily understood
+ program representation is the venerable
+ \textit{abstract syntax tree} (AST).
+An AST is a recursive tree data structure
+ where a node is an operator and
+ some number---potentially zero---of children ASTs.
+For example, the program $(a * 2) / 2$
+ is represented by the AST shown in \autoref{fig:ast1}.
+The operators $*$ and $/$ each take two children;
+ the variable $a$ and the number $2$ are leaf operators
+ that take no children.
+
+ASTs are the primary data structures used in most programming tools,
+ but they are not the only ones.
+A common alternate representation is the \textit{term graph},
+ which can be viewed as a variant of ASTs that loosens the tree requirement.
+Term graphs can there for capture sharing across common parts of a
+ program (also known as a term).
+\autoref{fig:ast2} shows a term graph for the program $(a * 2) / 2$.
+% Term graphs can be ``unfolded'' into ASTs be duplicating the shared subgraphs,
+%  but the resulting ASTs can be exponentially larger than the term graph.
+
+\begin{figure}
+  \subcaptionbox{AST without sharing.\label{fig:ast1}}
+    [0.5\linewidth]{\includegraphics[height=3cm]{ast}}
+  \subcaptionbox{Term graph with sharing.\label{fig:ast2}}
+    [0.5\linewidth]{\includegraphics[height=3cm]{ast-sharing}}
+  \caption{
+    Different representations of the program $(a * 2) / 2$ have
+     different characteristics.
+    The syntax tree is simpler \subref{fig:ast1},
+     but the term graph is smaller since it captures sharing \subref{fig:ast2}.
+  }\label{fig:ast}
+\end{figure}
+
+Regardless of the choice of program representation,
+ a common technique for program manipulation is rewriting.
+In this paradigm,
+ program transformations are given as a set of rewrites,
+ where each
+ rewrite $l \to r$ specifies a pattern $l$ to search for
+ and a another pattern $r$ with
+ which to replace each instance of $l$ found
+ in the program.
+For example, applying the rewrite $x * 2 \to x + x$
+ to our term $(a * 2) / 2$ yields $(a + a) / 2$.
+
+Rewriting offers an
+ intuitive, compositional, and efficient
+ method to transform programs
+ that is used in programming tools of all shapes and sizes.
+It is a well-researched technique with a wealth of literature,
+ \max{add citations}
+ but it is not without its pitfalls.
+\autoref{sec:rewriting} discusses these in detail,
+ but many of the difficulties boil down to the fact that
+ term rewriting operates on \emph{one term at a time}.
+
+\begin{figure}
+  \centering
+  \subcaptionbox{
+    Another subfigure\label{fig:bad-rewrites-a}
+  }{\includegraphics[height=35mm]{figures/bad-rewrites-a}}
+
+  \vspace{1cm}
+  \subcaptionbox{
+    Another subfigure\label{fig:bad-rewrites-b}
+  }{\includegraphics[height=35mm]{figures/bad-rewrites-b}}
+
+  \vspace{1cm}
+  \subcaptionbox{
+    Another subfigure\label{fig:bad-rewrites-c}
+  }{\includegraphics[height=35mm]{figures/bad-rewrites-c}}
+
+  \caption{
+    caption
+  }\label{fig:bad-rewrites}
+\end{figure}
+
+
+\section{Term Rewriting}
+\label{sec:rewriting}
+
 \egg builds on \egraphs and equality saturation.
   This section describes those techniques and
   presents the challenges that \egg addresses.
@@ -370,10 +455,8 @@ This eliminates the problem of choosing the right rule, but
 
       return egraph.extract_best()
   \end{lstlisting}
-  \vspace{2em}
-  \includegraphics[width=0.6\linewidth]{eqsat}
   \caption{
-    Pseudocode and box diagram for equality saturation.
+    Pseudocode for equality saturation.
     Traditionally, equality saturation maintains the \egraph data structure
       invariants throughout the algorithm.
   }

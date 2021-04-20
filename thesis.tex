@@ -22,6 +22,7 @@
 \usepackage{microtype}
 \usepackage[T1]{fontenc}
 
+\usepackage{wrapfig}
 \usepackage[font={sf}]{caption}
 \usepackage[subrefformat=parens]{subcaption}
 
@@ -36,12 +37,13 @@
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{proof}{Proof}[chapter]
 
-\usepackage{todonotes}
-\renewcommand\max[1]{\todo[color=orange]{#1}}
+\setlength{\marginparwidth}{2cm}
+\usepackage[textsize=tiny]{todonotes}
+\renewcommand\max[2][]{\todo[color=orange, #1]{\sffamily #2}}
 
 \usepackage{libertine}
 \usepackage[libertine]{newtxmath}
-\usepackage[scaled=.9]{DejaVuSansMono}
+\usepackage[scaled=.85]{DejaVuSansMono}
 
 \usepackage{listings}
 \lstset{
@@ -89,7 +91,7 @@
 \newcommand\thesisstmt{%
   e-graphs and equality saturation are compelling techniques for
   program representation and manipulation that should now be considered
-  for many types of programming tools across domains.
+  for programming tools across many domains.
 }
 
 \newcommand\Thesisstmt{\expandafter\MakeUppercase \thesisstmt}
@@ -174,6 +176,7 @@ Thanks to some people.
 \pagenumbering{arabic}
 \renewcommand{\chaptermark}[1]{\markboth{\sc{\chaptername\ \thechapter.\ #1}}{}}
 \renewcommand{\sectionmark}[1]{\markright{\sc{\thesection.\ #1}}{}}
+\listoftodos
 \input{chapters/01-intro}
 \input{chapters/02-background}
 \input{chapters/03-rebuilding}
