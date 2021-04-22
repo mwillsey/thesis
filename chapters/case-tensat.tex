@@ -1,11 +1,12 @@
 \section{Tensat: Optimizing Deep Learning Computation Graphs}
 \label{sec:tensat}
 
-\newcommand{\ourname}{Tensat}
+\newcommand{\ourname}{Tensat\xspace}
+\newcommand{\tensat}{Tensat\xspace}
 
 Deep learning frameworks and compilers
  (e.g., Tensorflow~\cite{TensorFlow}, PyTorch~\cite{NEURIPS2019_9015},
-  XLA~\cite{xla}, TensorRT~\cite{TensorRT}, TVM~\cite{TVM},
+  XLA~\cite{xla}, TensorRT~\cite{TensorRT}, TVM~\cite{tvm},
   MLIR~\cite{mlir})
  have enabled diverse kinds of machine learning models to run
  efficiently on numerous compute platforms.
@@ -24,13 +25,14 @@ The current industry-standard approach adopted by most frameworks is to use a ma
 %that often applies rewrite rules greedily.
 However, this approach often leads to sub-optimal results both due to the non-comprehensive set of rewrite rules, as well as the sub-optimal graph substitution heuristic \cite{taso,metaflow}. % that considers only a small fraction of all possible graphs reachable with a given set of rewrites \cite{taso, metaflow, Fang:sampling}.
 
-This paper aims to address the sub-optimality problem of graph rewrite strategies, while leveraging the existing rewrite rules generation technique \cite{taso}.
+This case study aims to address the sub-optimality problem of graph rewrite strategies, while leveraging the existing rewrite rules generation technique~\cite{taso}.
 Prior research has shown that searching for sequences of substitutions
 \cite{taso,metaflow,Fang:sampling} outperforms heuristic approaches.
 However, both heuristic and search-based solutions rely on sequential application of substitutions.
 Since rewrites often depend on or enable one another,
 optimization depends heavily on the order in which rewrites are applied;
-this classically tricky problem is known in the compilers community as the ``phase-ordering'' or ``rewrite-ordering'' problem.
+the ``phase ordering'' problem strikes again.
+% this classically tricky problem is known in the compilers community as the ``phase-ordering'' or ``rewrite-ordering'' problem.
 
 
 \begin{table}[]
@@ -54,31 +56,22 @@ this classically tricky problem is known in the compilers community as the ``pha
 \end{table}
 
 
-This paper presents \ourname{}, a tensor graph superoptimization framework that employs \emph{equality saturation} \cite{eqsat, eqsat-llvm, egg},
-a recent technique that mitigates the phase-ordering problem by
-applying all possible rewrites at once.  %comprehensively and scalably explore the search space of all equivalent graphs a given a set of rewrite rules.
-Equality saturation splits program optimization into two phases: {\em exploration} and {\em extraction}.
-The exploration phase uses a data structure called \emph{e-graph} to compactly generate and store all rewritings of the input program.
-The exploration can continue until \emph{saturation},
-where the e-graph stores all possible ways to write the input program using a given set of rewrites.
-% Finally, the extraction phase selects the globally optimal equivalent program from the e-graph.
-Finally, the extraction phase selects from the e-graph the equivalent program with the lowest cost according to a given cost model. The compact representation of the exponentially large search space using e-graphs enables extraction algorithms that can find the globally optimal equivalent program quickly.
+This case study presents \ourname{}, a tensor graph superoptimization framework that employs equality saturation \cite{eqsat, eqsat-llvm, egg},
+to apply all possible rewrites at once.  %comprehensively and scalably explore the search space of all equivalent graphs a given a set of rewrite rules.
+\tensat splits program optimization into two phases: {\em exploration} and {\em extraction}.
+The exploration phase is equality saturation using \egg as usual.
+\tensat's extraction phase is totally custom;
+ simple cost functions simply do not suffice for extracting efficient deep learning compute graphs.
+Instead, \tensat employs an Integer Linear Programming (ILP) extraction solution,
+ which requires
+ a novel method to filter out invalid subgraphs from an e-graph.
+% The extraction phase selects from the e-graph the equivalent program with the lowest cost according to a given cost model. The compact representation of the exponentially large search space using e-graphs enables extraction algorithms that can find the globally optimal equivalent program quickly.
 %\ourname{} uses equality saturation to replace the heuristic- or sequential-search-based rewriting approaches from prior work.
 
-% At the core of equality saturation is \emph{e-graph}: a data structure that can compactly represent equivalent expressions.
-%We defer a more formal description of e-graphs to \autoref{sec:esat} and instead focus here on the intuition behind e-graphs.
-%\CUT{An e-graph compactly represent a set of equivalent graphs by grouping equivalent sub-graphs into a single e-class, which is in turn used as a child node in possibly multiple sub-graphs.}
-%\TODO{Remy: we need to emphasize sharing.}
-% The construction of e-graphs involves repeated application of rewrite rules to add sub-graphs until \emph{saturation}, without destroying original graphs.
-%\CUT{Once saturated,  any graph equivalent to the original graph under the given set of rewrite rules can then be \emph{extracted} simply by choosing one option per e-class in the saturated e-graph. }
-%\TODO{Remy: this is a bit confusing, we are really picking one enode per class. Mangpo: do we need this much detail about e-graph here?}
-% The graph rewriting problem can therefore be reduced to constructing a saturated e-graph for a given graph under a set of rewrite rules, and subsequently extracting the optimal graph from the e-graph .
-%\CUT{by choosing a representative from each e-class}.
-
-Applying equality saturation to tensor graph rewriting requires non-trivial extensions in both the exploration and extraction phases.
-We extend the exploration phase to support complex, non-local rewrite rules that are necessary to produce highly efficient tensor graphs.
-Additionally, we introduce a novel method to filter out invalid subgraphs from an e-graph,
-which enables our extraction procedure based on Integer Linear Programming (ILP) to quickly find the optimal solution.
+% Applying equality saturation to tensor graph rewriting requires non-trivial extensions in both the exploration and extraction phases.
+% We extend the exploration phase to support complex, non-local rewrite rules that are necessary to produce highly efficient tensor graphs.
+% Additionally, we introduce a novel method to filter out invalid subgraphs from an e-graph,
+% which enables our extraction procedure based on Integer Linear Programming (ILP) to quickly find the optimal solution.
 
 We evaluated \ourname{} on a number of well-known machine learning models executing on a GPU.
 As highlighted in \autoref{table:ngraph}, \ourname{} can synthesize optimized graphs that are up to 23\% faster in runtime than state-of-the-art \cite{taso}, while reducing the optimization time by up to 300x.
@@ -94,14 +87,15 @@ As a result, our search approach is both extremely effective and fast enough to 
 %up to xxx faster performing graphs in up to xxx smaller search time while exploring an exponentially larger search space.
 %In addition, we have also performed a number of ablation studies to highlight the importance of the specific optimizations and extensions proposed in this paper.
 
-\subsection{Representations}
+\subsection{Representation}
 
 This section describes how \ourname{} represents tensor computation graphs and rewrite rules.
 
-\subsubsection{Representing Tensor Computation Graphs}
+\paragraph{Representing Tensor Computation Graphs}
 \label{sec:language}
 
-We use a representation based on the one in TASO \cite{taso}, with modifications to make it suitable for equality saturation.
+We use a representation based on the one in TASO~\cite{taso},
+ with modifications to make it suitable for equality saturation.
 \autoref{table:ops} shows the set of operators we consider.
 Each operator $o_i$ corresponds to a node $n_i$ in the graph; the node represents the output tensor of the operator.
 The nodes corresponding to the inputs of $o_i$ are the children nodes of $n_i$.
@@ -109,7 +103,12 @@ The nodes corresponding to the inputs of $o_i$ are the children nodes of $n_i$.
 % This way, all the relevant information of the tensor computation graph is represented syntactically by the nodes and the edges, without the need of additional annotations on the nodes.
 Each tensor computation graph is a DAG under this representation.
 
-The formulations in equality saturation becomes simpler if a graph is single-rooted. Therefore, we combine all the final output nodes of a graph with \emph{noop}s to make the graph single-rooted. The noop nodes do not have any actual operators associated with them, and they will not be altered during the exploration phase, so there is no side effects.
+The formulations in equality saturation become simpler if a graph is
+single-rooted. Therefore, we combine all the final output nodes of a
+graph with \emph{no-op}s to make the graph single-rooted. The no-op
+nodes do not have any actual operators associated with them, and they
+will not be altered during the exploration phase, so there are no side
+effects.
 
 
 \begin{table}[t]
@@ -153,7 +152,7 @@ The formulations in equality saturation becomes simpler if a graph is single-roo
         \sf reshape         & Reshape tensor                       & $(T, {\sf shape}) \rightarrow T$ \\
         \sf input           & Input tensor                         & ${\sf identifier} \rightarrow T$ \\
         \sf weight          & Weight tensor                        & ${\sf identifier} \rightarrow T$ \\
-        \sf noop            & Combine the outputs of the graph     & $(T, T) \rightarrow T$ \\
+        \sf no-op            & Combine the outputs of the graph     & $(T, T) \rightarrow T$ \\
     \end{tabular}
     \\[1em]
     \caption{
@@ -182,7 +181,7 @@ The formulations in equality saturation becomes simpler if a graph is single-roo
 \end{table}
 
 
-\subsubsection{Representing Rewrite Rules}
+\paragraph{Representing Rewrite Rules}
 \label{sec:rewrite}
 
 A rewrite rule for tensor computation graph specifies that some local subgraph pattern (\textit{source pattern}) is equivalent to another subgraph pattern (\textit{target pattern}).
@@ -196,26 +195,26 @@ Patterns with a single output is represented with an S-expr rooted on the output
 Rewrite rules with such patterns are called \textit{single-pattern rewrite rules}.
 Patterns with multiple outputs are represented as a list of S-exprs rooted on each output.
 Rewrite rules with multiple matched outputs are called \textit{multi-pattern rewrite rules}.
-\autoref{fig:rewrite} shows an example rewrite rule and its representation.
+% \autoref{fig:rewrite} shows an example rewrite rule and its representation.
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth, draft=true]{figures/rewrite-example.pdf}
-    \begin{scriptsize}
-    Source: (matmul ?input$_1$ ?input$_2$), (matmul ?input$_1$ ?input$_3$) \\
-    Target: (split$_0$ (split 1 (matmul ?input$_1$ (concat$_2$ 1 ?input$_2$ ?input$_3$)))), \\
-    (split$_1$ (split 1 (matmul ?input$_1$ (concat$_2$ 1 ?input$_2$ ?input$_3$))))
-    \end{scriptsize}
-    \caption{
-    Example rewrite rule and its representation in S-expressions.
-    Identifiers starting with "?" denote variable nodes.
-    For clarity, we omit the activation mode inputs to \texttt{matmul}.
-    Arrows point from parent nodes to children nodes.
-    1 is the axis for \texttt{split} and \texttt{concat} operators.
-    % The first argument to \texttt{matmul} indicates which activation function to use.
-    }
-    \label{fig:rewrite}
-\end{figure}
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=\linewidth, draft=true]{figures/rewrite-example.pdf}
+%     \begin{scriptsize}
+%     Source: (matmul ?input$_1$ ?input$_2$), (matmul ?input$_1$ ?input$_3$) \\
+%     Target: (split$_0$ (split 1 (matmul ?input$_1$ (concat$_2$ 1 ?input$_2$ ?input$_3$)))), \\
+%     (split$_1$ (split 1 (matmul ?input$_1$ (concat$_2$ 1 ?input$_2$ ?input$_3$))))
+%     \end{scriptsize}
+%     \caption{
+%     Example rewrite rule and its representation in S-expressions.
+%     Identifiers starting with "?" denote variable nodes.
+%     For clarity, we omit the activation mode inputs to \texttt{matmul}.
+%     Arrows point from parent nodes to children nodes.
+%     1 is the axis for \texttt{split} and \texttt{concat} operators.
+%     % The first argument to \texttt{matmul} indicates which activation function to use.
+%     }
+%     \label{fig:rewrite}
+% \end{figure}
 
 \subsection{Exploration Phase}
 \label{sec:saturation}
@@ -228,75 +227,63 @@ This is necessary since some rewrite rules requires input tensor shapes to satis
 We perform shape checking in the same way as TASO \cite{taso}.
 
 
-\paragraph{Multi-Pattern Rewrite Rules}
+% \paragraph{Multi-Pattern Rewrite Rules}
 
-Multi-pattern rewrite rules are an important type of rules for tensor graph superoptimization \cite{taso}.
-However, most equality saturation toolkits only support efficient search methods to find matches for single-pattern rewrite rules \cite{egg, ematching}.
-We introduce an algorithm for applying multi-pattern rewrites, as shown in \autoref{alg:multi}. Our algorithm leverages the existing efficient search routine for single-pattern rewrites as a subroutine.
-%For clarity, we omit the handling of single-pattern rules and cycles here (those are described in \autoref{alg:cycle}).
+% Multi-pattern rewrite rules are an important type of rules for tensor graph superoptimization \cite{taso}.
+% However, most equality saturation toolkits only support efficient search methods to find matches for single-pattern rewrite rules \cite{egg, ematching}.
+% We introduce an algorithm for applying multi-pattern rewrites, as shown in \autoref{alg:multi}. Our algorithm leverages the existing efficient search routine for single-pattern rewrites as a subroutine.
+% %For clarity, we omit the handling of single-pattern rules and cycles here (those are described in \autoref{alg:cycle}).
 
-At the beginning of the exploration phase, we collect the set of unique S-exprs present in the source patterns of the rewrite rules after canonicalization.
-Here, if one S-expr can be transformed into another S-expr by variable renaming only, they will be mapped to the same canonicalized S-expr.
-In each iteration of the exploration phase, we use the single-pattern search subroutine to search for matches of the canonical S-exprs.
-Then for each multi-pattern rule, we take the Cartesian product of the matches found, decanonicalize the variable-to-e-class map into the original variables (using the variable renaming map stored during canonicalization), and check if the matches are compatible at the shared variables between the S-exprs (i.e., if the shared variables refer to the same e-class after the mapping).
-We apply the matches that are compatible.
+% At the beginning of the exploration phase, we collect the set of unique S-exprs present in the source patterns of the rewrite rules after canonicalization.
+% Here, if one S-expr can be transformed into another S-expr by variable renaming only, they will be mapped to the same canonicalized S-expr.
+% In each iteration of the exploration phase, we use the single-pattern search subroutine to search for matches of the canonical S-exprs.
+% Then for each multi-pattern rule, we take the Cartesian product of the matches found, decanonicalize the variable-to-e-class map into the original variables (using the variable renaming map stored during canonicalization), and check if the matches are compatible at the shared variables between the S-exprs (i.e., if the shared variables refer to the same e-class after the mapping).
+% We apply the matches that are compatible.
 
-\begin{algorithm}[t]
-\small
-\caption{Applying multi-pattern rewrite rules}
-\label{alg:multi}
-\begin{algorithmic}[1]
-\Require starting e-graph $\mathcal{G}$, set of multi-pattern rewrite rules $\mathcal{R}_m$.
-\Ensure updated e-graph $\mathcal{G}$.
-\State canonicalized S-expr $e_c$ = Set(\{\})
-\For{rule $r \in \mathcal{R}_m$ }
-\For{$i = 0, \dots, |r|-1$ } \Comment{{\scriptsize $|r|$: \#S-exprs in source pattern}}
-    \State ($e$, rename\_map) = \Call{Canonical}{$r$.source[$i$]}
-    \State $e_c$.insert($e$)
-    \State $r$.map[i] = rename\_map
-\EndFor
-\EndFor
+% \begin{algorithm}[t]
+% \small
+% \caption{Applying multi-pattern rewrite rules}
+% \label{alg:multi}
+% \begin{algorithmic}[1]
+% \Require starting e-graph $\mathcal{G}$, set of multi-pattern rewrite rules $\mathcal{R}_m$.
+% \Ensure updated e-graph $\mathcal{G}$.
+% \State canonicalized S-expr $e_c$ = Set(\{\})
+% \For{rule $r \in \mathcal{R}_m$ }
+% \For{$i = 0, \dots, |r|-1$ } \Comment{{\scriptsize $|r|$: \#S-exprs in source pattern}}
+%     \State ($e$, rename\_map) = \Call{Canonical}{$r$.source[$i$]}
+%     \State $e_c$.insert($e$)
+%     \State $r$.map[i] = rename\_map
+% \EndFor
+% \EndFor
 
-  \For{iter = 0, \dots, MAX\_ITER}
-    \State $M$ = \Call{Search}{$\mathcal{G}, e_c$} \Comment{all matches for all patterns}
-    \For{rule $r \in \mathcal{R}_m$ }
-        \For{$i = 0, \dots, |r|-1$ }
-        \State canonical matches mc$_i$ = $M$[$r$.source[i]]
-        \State matches m$_i$ = \Call{Decanonical}{mc$_i$, $r$.map[$i$]}
-        \EndFor
-        \For{$(\sigma_0, \dots, \sigma_{|r|-1}) \in$ m$_0 \times \dots \times$ m$_{|r|-1}$}
-            \If{\Call{Compatible}{$(\sigma_0, \dots, \sigma_{|r|-1})$}}
-            \State \Call{Apply}{$\mathcal{G}, r, \sigma_0, \dots, \sigma_{|r|-1}$}
-            \EndIf
-        \EndFor
-    \EndFor
-  \EndFor
-\State \Return $\mathcal{G}$
-\end{algorithmic}
-\end{algorithm}
+%   \For{iter = 0, \dots, MAX\_ITER}
+%     \State $M$ = \Call{Search}{$\mathcal{G}, e_c$} \Comment{all matches for all patterns}
+%     \For{rule $r \in \mathcal{R}_m$ }
+%         \For{$i = 0, \dots, |r|-1$ }
+%         \State canonical matches mc$_i$ = $M$[$r$.source[i]]
+%         \State matches m$_i$ = \Call{Decanonical}{mc$_i$, $r$.map[$i$]}
+%         \EndFor
+%         \For{$(\sigma_0, \dots, \sigma_{|r|-1}) \in$ m$_0 \times \dots \times$ m$_{|r|-1}$}
+%             \If{\Call{Compatible}{$(\sigma_0, \dots, \sigma_{|r|-1})$}}
+%             \State \Call{Apply}{$\mathcal{G}, r, \sigma_0, \dots, \sigma_{|r|-1}$}
+%             \EndIf
+%         \EndFor
+%     \EndFor
+%   \EndFor
+% \State \Return $\mathcal{G}$
+% \end{algorithmic}
+% \end{algorithm}
 
-\iffalse
-\CUT{
-Multi-pattern rewrite rules have some important features that require special attention.
-The first one is that they can grow the e-graph infinitely.
-Let's consider again the example rewrite rule in \autoref{fig:rewrite}.
-This rule can be matched with any two \texttt{matmul} nodes with a shared input (input$_1$).
-By applying this rule once on some match, a new \texttt{matmul} node will be created and added to the e-graph (the one on the RHS of \autoref{fig:rewrite}), which also has input$_1$ as its input.
-This new \texttt{matmul} node together with any of the original \texttt{matmul} node will become a new match for this rule.
-This way, the example rule can be applied infinitely to grow the e-graph.
-}
-\fi
+% In our experience, one feature of multi-pattern rules for tensor graph is that they can grow the e-graph extremely rapidly.
+% Let's consider again the example rewrite rule in \autoref{fig:rewrite}.
+% This rule can be matched with any two \texttt{matmul} nodes with a shared input (input$_1$).
+% By applying this rule once on some match, a new \texttt{matmul} node will be created and added to the e-graph (the one on the RHS of \autoref{fig:rewrite}), which also has input$_1$ as its input.
+% If the e-graph contains $N$ \texttt{matmul} nodes that has some input$_1$ at the beginning, then after iteration 1, $\mathcal{O}(N^2)$ new \texttt{matmul} nodes sharing input$_1$ will be created.
+% In iteration 2, each pair in these $\mathcal{O}(N^2)$ nodes will be a match, which will create $\mathcal{O}(N^4)$ new nodes.
+% Such double exponential growth can quickly explode the e-graph.
 
-In our experience, one feature of multi-pattern rules for tensor graph is that they can grow the e-graph extremely rapidly.
-Let's consider again the example rewrite rule in \autoref{fig:rewrite}.
-This rule can be matched with any two \texttt{matmul} nodes with a shared input (input$_1$).
-By applying this rule once on some match, a new \texttt{matmul} node will be created and added to the e-graph (the one on the RHS of \autoref{fig:rewrite}), which also has input$_1$ as its input.
-If the e-graph contains $N$ \texttt{matmul} nodes that has some input$_1$ at the beginning, then after iteration 1, $\mathcal{O}(N^2)$ new \texttt{matmul} nodes sharing input$_1$ will be created.
-In iteration 2, each pair in these $\mathcal{O}(N^2)$ nodes will be a match, which will create $\mathcal{O}(N^4)$ new nodes.
-Such double exponential growth can quickly explode the e-graph.
-
-Based on this feature, we set a separate limit $k_{\textrm{multi}}$ on the number of iterations to apply the multi-pattern rules.
-After $k_{\textrm{multi}}$ iterations, we only apply the single-pattern rules until saturation or some user-specified limit.
+% Based on this feature, we set a separate limit $k_{\textrm{multi}}$ on the number of iterations to apply the multi-pattern rules.
+% After $k_{\textrm{multi}}$ iterations, we only apply the single-pattern rules until saturation or some user-specified limit.
 
 
 \subsection{Extraction Phase}
@@ -312,12 +299,11 @@ The total cost of a graph is the sum of costs of each of its nodes.
 This cost model is suitable for GPUs, since GPUs typically run one operator at a time when executing a graph.
 Note that an operator can be a fused operator, consisting of multiple primitive operators, such as a fused convolution and ReLU.
 
-\subsubsection{Extraction Algorithms}
 \label{sec:extraction}
 
 \paragraph{Greedy extraction}
 
-We first experiment with a greedy extraction strategy that has been shown to be effective for certain domains \cite{herbie, spores, egg}.
+We first experiment with a greedy extraction strategy that has been shown to be effective for certain domains~\cite{herbie, spores, egg}.
 %The first extraction method we experiment with is greedy extraction.
 %It has been shown to be a simple but effective method in multiple domains \cite{herbie, spores, egg}.
 For each e-class, the greedy strategy computes the total cost of the subtrees rooted on each of the e-nodes, and picks the e-node with the smallest subtree cost.
@@ -359,7 +345,7 @@ A more subtle requirement on the extraction phase is that the extracted graph ca
 While the e-graph can (and likely will) contain cycles, the extracted graph is meant to map directly to an executable tensor DAG.
 The extraction procedure must therefore take care to respect the acyclic invariant of DAGs.
 
-\autoref{fig:cycle} shows an example to illustrate how valid rewrites can produce cycles in the e-graph.
+% \autoref{fig:cycle} shows an example to illustrate how valid rewrites can produce cycles in the e-graph.
 To ensure the extracted graph does not contain cycles, we introduce a real variable $t_m$ for each e-class $m$ in the ILP.
 Constraint (4) ensures that the order defined by $t_m$'s is a valid topological order for the extracted graph.
 Here $\epsilon < 1/M$ is a small constant for effectively encoding strict inequalities in ILP.
@@ -378,7 +364,7 @@ Unlike greedy extraction, the optimal solution to the ILP is guaranteed to give 
 %     \label{fig:cycle}
 % \end{figure}
 
-\subsubsection{Cycle Filtering}
+\paragraph{Cycle Filtering}
 \label{sec:cycle}
 
 Similar to previous work that uses ILP extraction \cite{eqsat, spores},
@@ -446,33 +432,34 @@ We make sure those nodes are not picked during extraction by explicitly adding c
 By constructing a descendants map once before each iteration, each of the checking in the pre-filtering step takes constant time.
 The worst case complexity of the post-processing step is $\mathcal{O}(n_c N)$, where $n_c$ is the number of cycles in the e-graph.
 Since $n_c$ is typically much smaller than $n_m$, this algorithm is much faster than the vanilla cycle filtering.
-In practice each DFS pass over the e-graph can find many cycles, which makes $\mathcal{O}(n_c N)$ a very conservative upper bound.
+In practice, each DFS pass over the e-graph can find many cycles, which makes $\mathcal{O}(n_c N)$ a very conservative upper bound.
 
 \subsection{Evaluation}
 
-We implement \ourname{} in Rust~\cite{rust} using \texttt{egg}~\cite{egg}, an open source equality saturation library.
+We implemented \ourname{} in Rust~\cite{rust} using \texttt{egg}~\cite{egg}.
 For the extraction phase, we use SCIP \cite{scip} as the ILP solver, wrapped by Google OR-tools \cite{ortools}.
 
-We utilize egg's \textit{e-class analysis} feature for the shape checking discussed in \autoref{sec:saturation}.
+We utilize egg's \textit{e-class analysis} feature for the shape checking discussed.
 An e-class analysis associates data with each e-class to support rewrites that are not purely syntactic.
 We store all the relevant information of the tensors (shape, layout, split locations) in the analysis data and use these information for shape checking.
 
-\subsubsection{Experimental Setup}
+\paragraph{Experimental Setup}
 
-We compare \ourname{} with TASO \cite{taso} to evaluate our equality saturation based search.
-We use the same set of rewrite rules as TASO for our experiments.
-We evaluate on the inference graphs of 7 models:
+We compareed \ourname{} with TASO \cite{taso} to evaluate our equality saturation based search.
+We used the same set of rewrite rules as TASO for our experiments.
+We evaluated on the inference graphs of 7 models:
 \textbf{BERT} \cite{bert}, \textbf{ResNeXt-50} \cite{resnext50}, \textbf{NasNet-A} \cite{nasneta}, \textbf{NasRNN} \cite{nasrnn}, \textbf{Inception-v3} \cite{inceptionv3},
 \textbf{VGG-19} \cite{vgg}, and \textbf{SqueezeNet} \cite{squeezenet}.
 This benchmark set covers a wide range of commonly used state-of-the-art models, including both models for computer vision tasks and models for NLP tasks, both human-designed models and automatically-discovered models by neural architecture search.
-We perform all experiments on a Google Cloud instance with one NVIDIA Tesla T4 GPU, a 16-core CPU, and 60 GB of memory.
-We also experiment with ResNet-50 \cite{resnet}, but find that on T4 GPU, the rewrite rules from TASO cannot provide any speedup to the graph.
+We performed all experiments on a Google Cloud instance with one NVIDIA Tesla T4 GPU, a 16-core CPU, and 60 GB of memory.
+% We also experimented with ResNet-50 \cite{resnet}, but find that on T4 GPU, the rewrite rules from TASO cannot provide any speedup to the graph.
 
 For \ourname{}, our full approach uses the efficient cycle filtering algorithm (\autoref{sec:cycle}) during the exploration phase and the ILP method without the cycle constraints (\autoref{sec:extraction}) for extraction.
 We set a limit on the number of nodes in the e-graph $N_{\textrm{max}}=50000$ and the number of iterations for exploration $k_{\textrm{max}}=15$.
 We terminate the exploration phase when any of the limit is reached, or the e-graph is saturated.
 We set a separate limit $k_{\textrm{multi}}$ on the number of iterations to apply the multi-pattern rules.
-We use a default of $k_{\textrm{multi}}=1$ for the main results in \autoref{sec:speedup} and \autoref{sec:time}, and study the effect of varying $k_{\textrm{multi}}$ in \autoref{sec:multi-vary}.
+We use a default of $k_{\textrm{multi}}=1$ for the main results in \autoref{sec:speedup} and \autoref{sec:time}.
+ % and study the effect of varying $k_{\textrm{multi}}$ in \autoref{sec:multi-vary}.
 We set a timeout of 1 hour for the ILP solver.
 
 For TASO's backtracking search, we use their default settings from their artifact evaluation code on the number of iterations\footnote{The number of iterations of the outer loop, see Algorithm 2 in \cite{taso} for more details} $n=100$ and the hyperparameter $\alpha=1.0$ for each benchmark.
@@ -498,7 +485,7 @@ Increasing to $n=1000$ leads to less than 1\% speedup gain with the cost of over
   }\label{fig:overhead}
 \end{figure}
 
-\subsubsection{Program Speedup}
+\paragraph{Program Speedup}
 \label{sec:speedup}
 
 We compare the speedup percentage of the optimized graph with respect to the original graph between \ourname{} and TASO.
@@ -513,10 +500,7 @@ while still being 13.4$\times$ faster than TASO's search (see \autoref{fig:overh
 This improvement comes from the fact that equality saturation covers a much larger space of equivalent graphs than sequential backtracking search.
 By using e-graph as a compact representation of an exponential number of equivalent graphs, \ourname{} is able to cover orders of magnitude more equivalent graphs than TASO.
 
-We inspect the optimized graphs from \ourname{} and recorded some rewrite patterns that is used in them.
-We present several examples of useful patterns in the Appendix.
-
-\subsubsection{Optimization Time}
+\paragraph{Optimization Time}
 \label{sec:time}
 
 Another important metric is the time taken by the optimizer itself.
@@ -533,7 +517,7 @@ This shows that \ourname{} can not only cover a much larger search space, but al
 Furthermore, \ourname{}'s optimization time is small enough that we believe our approach can be integrated into a default compilation flow instead of running the search as an additional offline autotuning process.
 
 
-% \subsubsection{Varying Number of Iterations for Multi-Pattern Rewrites}
+% \paragraph{Varying Number of Iterations for Multi-Pattern Rewrites}
 % \label{sec:multi-vary}
 
 % As we discuss in \autoref{sec:saturation}, multi-pattern rewrite rules can grow the e-graph in a extremely rapid manner.
@@ -565,92 +549,92 @@ Furthermore, \ourname{}'s optimization time is small enough that we believe our 
 
 
 
-\subsubsection{Ablation Study}
-\label{sec:ablation}
+% \paragraph{Ablation Study}
+% \label{sec:ablation}
 
-In this section, we study the effect of the important design choices in our approach.
+% In this section, we study the effect of the important design choices in our approach.
 
-\paragraph{Greedy v.s. ILP extraction}
+% \paragraph{Greedy v.s. ILP extraction}
 
-The first important design choice is the extraction method.
-\autoref{table:extraction} shows the comparison between greedy extraction and ILP extraction.
-Although greedy extraction works fine on some benchmarks (e.g. NasRNN), it fails to extract an optimized graph on others (e.g. BERT and NasNet-A).
-This is due to the nature of greedy extraction: it makes the choices on which node to pick separately and greedily, without considering the inter-dependencies between the choices.
-Consider the rewrite in \autoref{fig:rewrite} (merging two \texttt{matmul}s by \texttt{concat} and \texttt{split}) as an illustrative example.
-After applying this rewrite to the e-graph, there will be two e-classes that have multiple e-nodes: one e-class per each output.
-This rewrite can reduce the cost only if both e-classes choose the split node, since the RHS subgraph can be reused by the two outputs.
-However, greedy extraction will never pick the split nodes, since it does not know the RHS subgraph is shared between the two split nodes.
+% The first important design choice is the extraction method.
+% \autoref{table:extraction} shows the comparison between greedy extraction and ILP extraction.
+% Although greedy extraction works fine on some benchmarks (e.g. NasRNN), it fails to extract an optimized graph on others (e.g. BERT and NasNet-A).
+% This is due to the nature of greedy extraction: it makes the choices on which node to pick separately and greedily, without considering the inter-dependencies between the choices.
+% Consider the rewrite in \autoref{fig:rewrite} (merging two \texttt{matmul}s by \texttt{concat} and \texttt{split}) as an illustrative example.
+% After applying this rewrite to the e-graph, there will be two e-classes that have multiple e-nodes: one e-class per each output.
+% This rewrite can reduce the cost only if both e-classes choose the split node, since the RHS subgraph can be reused by the two outputs.
+% However, greedy extraction will never pick the split nodes, since it does not know the RHS subgraph is shared between the two split nodes.
 
-\begin{table}[]
-    \centering
-    \begin{tabular}{cccc}
-    \hline
-        {\bf Graph Runtime (ms)} & {\bf Original} & {\bf Greedy} & {\bf ILP} \\
-    \hline
-        BERT & 1.88 & 1.88 & \textbf{1.73} \\
-        NasRNN & 1.85 & 1.15 & \textbf{1.10} \\
-        NasNet-A & 17.8 & 22.5 & \textbf{16.6} \\
-    \hline
-    \end{tabular}
-    \caption{Comparison between greedy extraction and ILP extraction, on BERT, NasRNN, and NasNet-A.
-    This table shows the runtime of the original graphs and the optimized graphs by greedy extraction and ILP extraction.
-    The exploration phase is run with $k_{\textrm{multi}} = 1$. }
-    \label{table:extraction}
-\end{table}
+% \begin{table}[]
+%     \centering
+%     \begin{tabular}{cccc}
+%     \hline
+%         {\bf Graph Runtime (ms)} & {\bf Original} & {\bf Greedy} & {\bf ILP} \\
+%     \hline
+%         BERT & 1.88 & 1.88 & \textbf{1.73} \\
+%         NasRNN & 1.85 & 1.15 & \textbf{1.10} \\
+%         NasNet-A & 17.8 & 22.5 & \textbf{16.6} \\
+%     \hline
+%     \end{tabular}
+%     \caption{Comparison between greedy extraction and ILP extraction, on BERT, NasRNN, and NasNet-A.
+%     This table shows the runtime of the original graphs and the optimized graphs by greedy extraction and ILP extraction.
+%     The exploration phase is run with $k_{\textrm{multi}} = 1$. }
+%     \label{table:extraction}
+% \end{table}
 
-\paragraph{ILP with or without cycle constraints}
+% \paragraph{ILP with or without cycle constraints}
 
-Here we study the effect of whether or not to include the cycle constraints in ILP.
-\autoref{table:cycle} presents the effect on extraction time as $k_{\textrm{multi}}$ (thus e-graph size) varies.
-With the cycle constraints, ILP solver time quickly increases with the e-graph size, and reaches timeout when $k_{\textrm{multi}}=2$.
-In our experiments, the ILP solver has not yet found a feasible solution at timeout.
-Removing the cycle constraints leads to approximately 10x--1000x speedup on ILP solving time on larger e-graphs.
-These results show that the main difficulty for the ILP solver is to satisfy the cycle constraints.
-Thus, removing the cycle constraints makes it possible for our approach to scale to larger e-graphs.
+% Here we study the effect of whether or not to include the cycle constraints in ILP.
+% \autoref{table:cycle} presents the effect on extraction time as $k_{\textrm{multi}}$ (thus e-graph size) varies.
+% With the cycle constraints, ILP solver time quickly increases with the e-graph size, and reaches timeout when $k_{\textrm{multi}}=2$.
+% In our experiments, the ILP solver has not yet found a feasible solution at timeout.
+% Removing the cycle constraints leads to approximately 10x--1000x speedup on ILP solving time on larger e-graphs.
+% These results show that the main difficulty for the ILP solver is to satisfy the cycle constraints.
+% Thus, removing the cycle constraints makes it possible for our approach to scale to larger e-graphs.
 
-\begin{table}[]
-    \centering
-    \begin{tabular}{ccccc}
-    \hline
-        {\bf Extraction} & \multirow{2}{*}{\bf $k_{\textrm{multi}}$} & \multicolumn{2}{c}{\bf With cycle} & {\bf Without} \\
-        {\bf time (s)} & & real & int & {\bf cycle} \\
-    \hline
-       \multirow{2}{*}{BERT} & 1 & 0.96 & 0.98 & \textbf{0.16} \\
-       & 2 & $>$3600 & $>$3600 & \textbf{510.3} \\
-       \hline
-       \multirow{2}{*}{NasRNN} & 1 & 1116 & 1137 & \textbf{0.32}  \\
-       & 2 & $>$3600 & $>$3600 & \textbf{356.7}  \\
-       \hline
-       \multirow{2}{*}{NasNet-A} & 1 & 424 & 438 & \textbf{1.81}  \\
-       & 2 & $>$3600 & $>$3600 & \textbf{75.1}  \\
-    \hline
-    \end{tabular}
-    \caption{Effect of whether or not to include cycle constraints in ILP on extraction time (in seconds), on BERT, NasRNN, and NasNet-A.
-    For the cycle constraints, we compare both using real variables and using integer variables for the topological order variables $t_m$. }
-    \label{table:cycle}
-\end{table}
+% \begin{table}[]
+%     \centering
+%     \begin{tabular}{ccccc}
+%     \hline
+%         {\bf Extraction} & \multirow{2}{*}{\bf $k_{\textrm{multi}}$} & \multicolumn{2}{c}{\bf With cycle} & {\bf Without} \\
+%         {\bf time (s)} & & real & int & {\bf cycle} \\
+%     \hline
+%        \multirow{2}{*}{BERT} & 1 & 0.96 & 0.98 & \textbf{0.16} \\
+%        & 2 & $>$3600 & $>$3600 & \textbf{510.3} \\
+%        \hline
+%        \multirow{2}{*}{NasRNN} & 1 & 1116 & 1137 & \textbf{0.32}  \\
+%        & 2 & $>$3600 & $>$3600 & \textbf{356.7}  \\
+%        \hline
+%        \multirow{2}{*}{NasNet-A} & 1 & 424 & 438 & \textbf{1.81}  \\
+%        & 2 & $>$3600 & $>$3600 & \textbf{75.1}  \\
+%     \hline
+%     \end{tabular}
+%     \caption{Effect of whether or not to include cycle constraints in ILP on extraction time (in seconds), on BERT, NasRNN, and NasNet-A.
+%     For the cycle constraints, we compare both using real variables and using integer variables for the topological order variables $t_m$. }
+%     \label{table:cycle}
+% \end{table}
 
-\paragraph{Efficient cycle filtering}
+% \paragraph{Efficient cycle filtering}
 
-To remove the cycle constraints from ILP, we need to perform cycle filtering during the exploration phase.
-Here we compare the two cycle filtering techniques introduced in \autoref{sec:cycle}.
-\autoref{table:efficient} shows the effect on the exploration phase time, as $k_{\textrm{multi}}$ varies.
-We can see that the efficient cycle filtering algorithm achieves up to 2000x speedup compared with the vanilla algorithm, making it possible to explore a larger e-graph.
+% To remove the cycle constraints from ILP, we need to perform cycle filtering during the exploration phase.
+% Here we compare the two cycle filtering techniques introduced in \autoref{sec:cycle}.
+% \autoref{table:efficient} shows the effect on the exploration phase time, as $k_{\textrm{multi}}$ varies.
+% We can see that the efficient cycle filtering algorithm achieves up to 2000x speedup compared with the vanilla algorithm, making it possible to explore a larger e-graph.
 
-\begin{table}[]
-    \centering
-    \begin{tabular}{ccccccc}
-    \hline
-        \multirow{2}{*}{$k_{\textrm{multi}}$} & \multicolumn{2}{c}{BERT} & \multicolumn{2}{c}{NasRNN} & \multicolumn{2}{c}{NasNet-A} \\
-        & Van. & Eff. & Van. & Eff. & Van. & Eff. \\
-    \hline
-        1 & 0.18 & \textbf{0.17} & 1.30 & \textbf{0.08} & 3.76 & \textbf{1.27} \\
-        2 & 32.9 & \textbf{0.89} & 2932 & \textbf{1.47} & $>$3600 & \textbf{8.62} \\
-    \hline
-    \end{tabular}
-    \caption{Comparison between vanilla cycle filtering and efficient cycle filtering, on the exploration phase time (in seconds) for BERT, NasRNN, and NasNet-A.}
-    \label{table:efficient}
-\end{table}
+% \begin{table}[]
+%     \centering
+%     \begin{tabular}{ccccccc}
+%     \hline
+%         \multirow{2}{*}{$k_{\textrm{multi}}$} & \multicolumn{2}{c}{BERT} & \multicolumn{2}{c}{NasRNN} & \multicolumn{2}{c}{NasNet-A} \\
+%         & Van. & Eff. & Van. & Eff. & Van. & Eff. \\
+%     \hline
+%         1 & 0.18 & \textbf{0.17} & 1.30 & \textbf{0.08} & 3.76 & \textbf{1.27} \\
+%         2 & 32.9 & \textbf{0.89} & 2932 & \textbf{1.47} & $>$3600 & \textbf{8.62} \\
+%     \hline
+%     \end{tabular}
+%     \caption{Comparison between vanilla cycle filtering and efficient cycle filtering, on the exploration phase time (in seconds) for BERT, NasRNN, and NasNet-A.}
+%     \label{table:efficient}
+% \end{table}
 
 
 %%% Local Variables:

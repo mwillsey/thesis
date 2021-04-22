@@ -9,8 +9,9 @@ The preceding chapters have articulated the
  technical novelties, practical features,
  and quantitative evidence that supports this claim.
 This chapter provides qualitative evidence through case studies
- of independently-developed, published\footnotemark{}
- projects from diverse domains
+ of independently-developed
+ projects\footnotemark{}
+ from diverse domains
  that incorporated \egg.
 
 Users have built program synthesizers, optimizers, and provers
@@ -23,11 +24,12 @@ In many cases, the developers had first rolled their own \egraph
  dramatically broaden the project's scope thanks to \egg's speed and
  flexibility.
 In addition to gaining performance, all projects use \egg's novel
-  extensibility features like \eclass analyses and dynamic/conditional rewrites.
+  extensibility features like \eclass analyses and dynamic rewrites.
 
 \footnotetext{
   The case studies feature the following works:
   \\
+  \scriptsize
   \begin{tabular}{llll}
     Szalinski \cite{szalinski} & \autoref{sec:szalinski} & PLDI 2020
     & Nandi, \textbf{Willsey}, Anderson, Wilcox, Darulova, Grossman, Tatlock
@@ -37,13 +39,16 @@ In addition to gaining performance, all projects use \egg's novel
     \\
     Tensat \cite{tensat} & \autoref{sec:tensat} & MLSys 2021
     & Yang, Phothilimtha, Wang, \textbf{Willsey}, Roy, Pienaar
+    \\
+    Ruler \cite{ruler} & \autoref{sec:ruler} & Under submission
+    & Nandi, \textbf{Willsey}, Zhu, Saiki, Wang, Anderson, Schulz, Grossman, Tatlock
   \end{tabular}
 }
 
  \include{chapters/case-szalinski}
- % \section{Rewrite Synthesis}
  \include{chapters/case-herbie}
  \include{chapters/case-tensat}
+ \include{chapters/case-ruler}
 
 %%% Local Variables:
 %%% TeX-master: "../thesis"
