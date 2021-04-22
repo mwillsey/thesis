@@ -183,9 +183,27 @@ In the rebuilding paradigm,
 The \texttt{rebuild} operation processes this worklist, restoring the invariants
   of deduplication and congruence.
 Rebuilding is similar to other approaches in how it restores congruence
-  (see \nameref{sec:related} for comparison to \cite{downey-cse});
   but it uniquely allows the client to choose when to restore invariants in the
-  context of a larger algorithm like equality saturation.
+  context of a larger algorithm like equality saturation.\footnote{
+Our rebuilding algorithm is similar to the congruence closure algorithm
+  presented by \cite{downey-cse}.
+The contribution of rebuilding is not \emph{how} it restores the \egraph invariants
+  but \emph{when};
+  it gives the client the ability to specialize invariant restoration to a
+  particular workload like equality saturation.
+Their algorithm also features a worklist of merges to be processed further,
+  but it is offline, i.e.,
+  the algorithm processes a given set of equalities and outputs the set of
+  equalities closed over congruence.
+Rebuilding is adapted to the online e-graph (and equality saturation) setting,
+  where rewrites frequently examine the current set of equalities and assert new ones.
+Rebuilding additionally propagates e-class analysis facts (\autoref{sec:analysis}).
+Despite these differences,
+  the core algorithms algorithms are similar enough that theoretical results on
+  offline performance characteristics \cite{downey-cse} apply to both.
+We do not provide theoretical analysis of rebuilding for the online setting;
+  it is likely highly workload dependent.
+}
 
 \autoref{fig:rebuild-code} shows pseudocode for the main \egraph operations and
   rebuilding.
