@@ -111,10 +111,10 @@ The interface of an \eclass analysis is as follows,
 
 The domain $D$ together with the \textsf{join} operation should form a join-semilattice.
 The semilattice perspective is useful for defining the \textit{analysis invariant}
-  (where $\wedge$ is the \textsf{join} operation):
+  (where $\vee$ is the \textsf{join} operation):
 \[
   \forall c \in G.\quad
-  d_{c} = \bigwedge_{n \in c} \textsf{make}(n)
+  d_{c} = \bigvee_{n \in c} \textsf{make}(n)
   \quad \text{and} \quad
   \textsf{modify}(c) = c
 \]
