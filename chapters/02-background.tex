@@ -2,6 +2,7 @@
 \label{sec:background}
 
 \section{Term Representation and Rewriting}
+\label{sec:rewriting}
 
 The most common and easily understood
  program representation is the venerable
@@ -18,8 +19,9 @@ The operators $*$ and $/$ each take two children;
 ASTs are the primary data structures used in most programming tools,
  but they are not the only ones.
 A common alternate representation is the \textit{term graph},
- which can be viewed as a variant of ASTs that loosens the tree requirement.
-Term graphs can there for capture sharing across common parts of a
+ which can be viewed as a variant of ASTs that
+ allows directed acyclic graphs instead of just trees.
+Term graphs can therefore capture sharing across common parts of a
  program (also known as a term).
 \autoref{fig:ast2} shows a term graph for the program $(a * 2) / 2$.
 % Term graphs can be ``unfolded'' into ASTs be duplicating the shared subgraphs,
@@ -43,52 +45,97 @@ Regardless of the choice of program representation,
 In this paradigm,
  program transformations are given as a set of rewrites,
  where each
- rewrite $l \to r$ specifies a pattern $l$ to search for
+ rewrite $\ell \to r$ specifies a pattern $\ell$ to search for
  and a another pattern $r$ with
- which to replace each instance of $l$ found
+ which to replace each instance of $\ell$ found
  in the program.
 For example, applying the rewrite $x * 2 \to x + x$
  to our term $(a * 2) / 2$ yields $(a + a) / 2$.
+
+Stated more formally,
+ applying rewrite $\ell \to r$ on a term $t$
+ works as follows.
+First, search for the $\ell$ within $t$,
+ yielding a substitution $\sigma$ and a subterm $s$ of $t$
+ such that $\sigma$ maps variables from $\ell$ to terms
+ and $\ell[\sigma] = s$,
+ where $\ell[\sigma]$ denotes replacing the variables in $l$
+ with the corresponding terms in $\sigma$.
+With the substitution in hand,
+ applying the rewrite simply replaces
+ $\ell[\sigma]$ with $r[\sigma]$ in $t$
+ (since $\ell[\sigma]$ equals some subterm $s$ of $t$).
 
 Rewriting offers an
  intuitive, compositional, and efficient
  method to transform programs
  that is used in programming tools of all shapes and sizes.
-It is a well-researched technique with a wealth of literature,
- \max{add citations}
- but it is not without its pitfalls.
-\autoref{sec:rewriting} discusses these in detail,
- but many of the difficulties boil down to the fact that
- term rewriting operates on \emph{one term at a time}.
+It is a well-researched technique with a wealth of literature
+ (surveyed in~\cite{nachum-rewrites, rewritesystems}),
+ and many programming language tools implement and rely on it.
+
+Term rewriting (in its traditional directed form) does, however,
+ suffer from pitfalls that can complicate or prevent the building
+ of certain rewrite-based systems.
+Many of these weaknesses boil down to the fact that
+ term rewriting operates on \emph{one term at a time};
+ once a term is rewritten,
+ you are left with the new version and have
+ essentially forgotten the old version.
+The quality of a rewriting system's output can heavily depend on
+ the order and manner in which is applies its rewrites.
+In other words, \emph{choices really matter} in this paradigm.
+The compilers community refers to this as the
+ \textit{phase-ordering} problem~\cite{eqsat}.
 
 \begin{figure}
   \centering
   \subcaptionbox{
-    Another subfigure\label{fig:bad-rewrites-a}
-  }{\includegraphics[height=35mm]{figures/bad-rewrites-a}}
+    Sometimes a locally ``good'' rewrite can be a poor choice down the road.
+    In this case, we would ultimately like to rewrite $(a * 2) / 2$ to $2$.
+    But applying $x * 2 \to x \ll 1$ is hard to pass up,
+     since replacing a (relatively) expensive multiplication with a
+     cheap bitshift is nearly always a good decision.
+    Applying that locally beneficial rewrite makes canceling out the
+     2s much more difficult.\label{fig:bad-rewrites-a}
+  }[\linewidth]{\includegraphics[height=35mm]{figures/bad-rewrites-a}}
 
   \vspace{1cm}
   \subcaptionbox{
-    Another subfigure\label{fig:bad-rewrites-b}
-  }{\includegraphics[height=35mm]{figures/bad-rewrites-b}}
+    Seemingly innocuous rewrites like commutativity of multiplication
+     ($x * y \to y * x$)
+    can send a rewriting system into a loop.
+    Directed rewriting systems can avoid this by applying
+     these rewrites in only one direction or trying to observe when they have
+     encountered a term they have seen before.\label{fig:bad-rewrites-b}
+  }[\linewidth]{\includegraphics[height=35mm]{figures/bad-rewrites-b}}
 
   \vspace{1cm}
   \subcaptionbox{
-    Another subfigure\label{fig:bad-rewrites-c}
-  }{\includegraphics[height=35mm]{figures/bad-rewrites-c}}
+    Expansive rewrites like $x \to x * 1$
+     can enable other rewrites,
+     but they are problematic for traditional rewriting systems
+     since they can always be applied,
+     potentially leading to infinitely large terms.
+   \label{fig:bad-rewrites-c}
+  }[\linewidth]{\includegraphics[height=35mm]{figures/bad-rewrites-c}}
 
   \caption{
-    caption
+    Conventional directed rewriting can go wrong in various ways
+    if the wrong rewriting is applied at the wrong time.
+    Orange highlighting indicates what changed from the initial term in each subfigure.
   }\label{fig:bad-rewrites}
 \end{figure}
 
+\autoref{fig:bad-rewrites} shows some concrete examples of how
+ poor rewrite choice can cause undesirable results.
 
-\section{Term Rewriting}
-\label{sec:rewriting}
 
-\egg builds on \egraphs and equality saturation.
-  This section describes those techniques and
-  presents the challenges that \egg addresses.
+% \section{Term Rewriting}
+
+% \egg builds on \egraphs and equality saturation.
+%   This section describes those techniques and
+%   presents the challenges that \egg addresses.
 
 % Many problems in program optimization, theorem proving,
 %   and other domains have a similar shape:
@@ -118,6 +165,12 @@ Originally developed for and still used in the
 
 \subsection{Definitions}
 
+Intuitively,
+  an \egraph is a set of equivalence classes (\textit{\eclasses}).
+Each \eclass is a set of \textit{\enodes} representing equivalent terms from a given language,
+  and an \enode is a function symbol paired with a list of children \eclasses.
+More precisely:
+
 \begin{figure}
   \centering
   \begin{align*}
@@ -134,12 +187,6 @@ Originally developed for and still used in the
   }
   \label{fig:syntax}
 \end{figure}
-
-Intuitively,
-  an \egraph is a set of equivalence classes (\textit{\eclasses}).
-Each \eclass is a set of \textit{\enodes} representing equivalent terms from a given language,
-  and an \enode is a function symbol paired with a list of children \eclasses.
-More precisely:
 
 \begin{definition}[Definition of an E-Graph]
   \label{def:egraph}
@@ -347,9 +394,10 @@ These are collectively referred to as the \textit{e-graph invariants}.
       but nothing is removed.
     Expressions added by rewrites are merged with the matched \eclass.
     In \autoref{fig:egraph-rewrite4}, the rewrites do not add any new nodes,
-      only merge \eclasses.
-    The resulting \egraph has a cycle,
-      representing infinitely many expressions:
+      they only merge \eclasses;
+      so the \egraph gets \emph{smaller} but represents \emph{more} terms.
+    Since the resulting \egraph has a cycle,
+      it actually represents infinitely many expressions:
       $a$, $a \times 1$, $a \times 1 \times 1$, and so on.
   }
   \label{fig:egraph-rewrite}
@@ -421,20 +469,22 @@ In this setting, a tool repeatedly chooses one of a set of axiomatic rewrites,
   searches for matches of the left-hand pattern in the given
   expression, and replaces matching instances with the substituted
   right-hand side.
+It does, however, suffer from drawbacks such as the phase ordering
+ problem (\autoref{sec:rewriting}).
 
-Term rewriting is typically destructive and ``forgets'' the matched
-  left-hand side.
-Consider applying a simple strength reduction rewrite:
-  ${ (a \times 2) / 2 \to (a \ll 1) / 2 }$.
-The new term carries no
-  information about the initial term.
-Applying strength reduction at this point prevents us from canceling out $2/2$.
-In the compilers community, this classically tricky question of when to apply
-  which rewrite is called the \textit{phase ordering} problem.
+% Term rewriting is typically destructive and ``forgets'' the matched
+%   left-hand side.
+% Consider applying a simple strength reduction rewrite:
+%   ${ (a \times 2) / 2 \to (a \ll 1) / 2 }$.
+% The new term carries no
+%   information about the initial term.
+% Applying strength reduction at this point prevents us from canceling out $2/2$.
+% In the compilers community, this classically tricky question of when to apply
+%   which rewrite is called the \textit{phase ordering} problem.
 
 One solution to the phase ordering problem would simply apply all
   rewrites simultaneously, keeping track of every expression seen.
-This eliminates the problem of choosing the right rule, but
+This eliminates the problem of choosing the correct rule, but
   a naive implementation would require space exponential in the number
   of given rewrites.
 \textit{Equality saturation}~\cite{eqsat, eqsat-llvm} is a technique to do this
