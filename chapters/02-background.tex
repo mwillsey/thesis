@@ -538,8 +538,7 @@ Unfortunately, the technique remains ad hoc; prospective equality saturation
   that is not supported by purely syntactic rewrites.
 \egg aims to address each aspect of these difficulties.
 
-\section{Equality Saturation and Theorem Proving}
-
+\paragraph{Equality Saturation and Theorem Proving}
 An equality saturation engine and a theorem prover each have capabilities that
   would be impractical to replicate in the other.
 Automated theorem provers like satisfiability modulo theory (SMT) solvers are
@@ -575,6 +574,32 @@ Z3 takes 24.65 seconds to perform the verification;
   \egg performs the same task in 1.56 seconds ($15\times$ faster),
   or only 0.52 seconds ($47\times$ faster) when using
   \egg's batched evaluation (\autoref{sec:egg-batched}).
+
+\paragraph{Equality Saturation and Superoptimization}
+The Denali~\cite{denali} superoptimizer first demonstrated how to use \egraphs
+for optimized code generation as an alternative to hand-optimized machine code
+and prior exhaustive approaches~\cite{massalin}, both of which were less
+scalable. The inputs to Denali are programs in a C-like language from which it
+produces assembly programs. Denali supported three types of
+rewrites---arithmetic, architectural, and program-specific. After applying these
+rewrites till saturation, it used architectural description of the hardware to
+generate constraints that were solved using a SAT solver to output a
+near-optimal program. While Denali's approach was a significant improvement over
+prior work, it was intended to be used on straight line code only and therefore,
+did not apply to large real programs.
+
+Equality saturation~\cite{eqsat, eqsat-llvm} developed a compiler optimization
+phase that works for complex language constructs like loops and conditionals.
+The first equality saturation paper used an intermediate representation called
+Program Expression Graphs (PEGs) to encode loops and conditionals. PEGs have
+specialized nodes that can represent infinite sequences, which allows them to
+represent loops. It uses a global profitability heuristic for extraction which
+is implemented using a pseudo-boolean solver. Recently, \cite{yogo-pldi20} used
+PEGs for code search.
+\egg can support PEGs as a user-defined language,
+and thus their technique could be ported.
+
+
 
 % \James{
   % The experimental/perf numbers in the last par of 2.4 feel out of place. Not sure how to fix...
