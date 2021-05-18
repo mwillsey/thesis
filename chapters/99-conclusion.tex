@@ -61,7 +61,7 @@ If the same technique can shrink 3D CAD programs (\autoref{sec:szalinski}),
 Even outside of those case studies,
  \egg is powering or inspiring many additional projects,
  only some of which are published at the time of writing
- this~\cite{spores, Cheli2021, vanhattum2021vectorization}.
+ this~\cite{spores, Cheli2021, diospyros}.
 
 
 People used and worked on equality saturation before
@@ -91,6 +91,58 @@ With these advances,
  I hope that others find that equality saturation
  is a viable, useful, and even fun
  technique with a more straightforward journey than my own.
+
+\section{Future Work}
+
+Going forward,
+ I hope and expect that equality saturation will
+ take a larger role is all kinds
+ of compilers, synthesizers, and optimizers.
+But further work is needed to get there.
+While \egg can already be used to build
+ a state-of-the-art optimizer
+ fast enough to use in a compiler~\cite{tensat},
+ this only applies for domains
+ with algebraic, context-free interpretations of their expressions.
+To make \eqsat practical in more complex domains
+ (like general purpose programming languages),
+ new conceptual advances are required.
+
+Prior work~\cite{eqsat} introduced
+ \textit{Program Expression Graphs} (PEGs)
+ to represent programs with mutation and loops inside \egraphs,
+ but not
+% While this allows representation of
+%  low-level IRs like LLVM,
+%  it does not solve the problem for
+ source-level programs or functional IRs.
+These latter two are tricky for \egraphs because binding means
+ that equivalence is \textit{contextual}:
+ two variables $x$ in the program might refer to different binding sites.
+\Eclass analyses could be combined
+ with recent work~\cite{hashing-alpha} that
+ proposes a modular way to describe binding structure.
+
+Complex domains will require larger search spaces,
+ further pushing the performance requirements for \egraphs and \eqsat.
+This work introduced a new, more efficient
+ algorithm for congruence closure in \egraphs;
+ the remaining bottleneck is
+ e-matching.
+\egg uses the current state-of-the-art~\cite{ematching}
+ backtracking algorithm that wastes work when
+ search for patterns like $(x * y) + (x * z)$ with multiple
+ occurrences of the same variables.
+A smarter e-matching algorithm could
+ take advantage of these equality constraints,
+ similar to how joins in a relational database do.
+
+Finally, \eqsat's performance and correctness
+ both hinge on the rewrites provided by the users.
+If those rewrites are incomplete or unsound,
+ \eqsat may miss optimizations or yield incorrect results.
+Automatically generating these rules could make using \eqsat even
+ easier for prospective users.
 
 %%% Local Variables:
 %%% TeX-master: "../thesis"
